@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 
 
 const Formulario = () => {
-  return <main className={`w-screen h-full pb-8 bg-[url(/images/bg.png)] bg-no-repeat bg-cover text-[#3C3C3B]`}>
+  return <main className={`absolute w-full h-full  bg-[url(/images/bg.png)]  bg-contain text-[#3C3C3B]`}>
    <Header/>
     <Register/>
   </main>;

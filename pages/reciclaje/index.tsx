@@ -25,7 +25,7 @@ interface DataType {
 type DataIndex = keyof DataType;
 
 const Reciclaje = () => {
-  const { logout, session, status } = useAuth();
+  const {  status } = useAuth();
   const [weightUpdate, setWeightUpdate] = useState(0);
   const [showFormSum, setShowFormSum] = useState(false);
   const [showFormUpdate, setShowFormUpdate] = useState(false);
@@ -200,12 +200,8 @@ const Reciclaje = () => {
 
 
   
-  return <main className='debug p-6 md:py-16 lg:p-24 min-w-screen min-h-screen box-border bg-[url(/images/bg.png)] bg-no-repeat bg-cover'>
-    {
-      session && session.user && <p>{session.user.name}</p>
-    }
-    
-    <button onClick={() => logout()}>Salir</button>
+  return <main className=' min-w-screen min-h-screen  bg-cover'>
+  
     {
       showFormSum && <section className='fixed left-0 top-0 w-screen h-screen bg-black/50 z-20 flex justify-center items-center'>
         <section className='px-6 w-[90%] md:w-96 h-56 rounded-3xl bg-white flex justify-center items-center'>
@@ -251,11 +247,13 @@ const Reciclaje = () => {
       </section>
     }
     <Register/>
-    {
-      loadingEntities ? <Loading text="Cargando datos..." type="bars"/>
-      :
-      <Table<DataType> columns={columns} dataSource={entities}/>
-    }
+    <div className="absolute bottom-0 py-96 w-11/12 left-16 z-10">
+          {loadingEntities ? (
+            <Loading text="Cargando datos..." type="bars" />
+          ) : (
+            <Table<DataType> columns={columns} dataSource={entities} />
+          )}
+        </div>
     
   </main>;
 }
