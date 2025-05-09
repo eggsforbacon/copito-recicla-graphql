@@ -151,8 +151,8 @@ const Register = ({ entity }: props) => {
   }
 
   return (
-    <main className={`w-screen h-screen  text-[#3C3C3B]`}>
-      <section className="min-h-screen py-16 px-16 bg-[url(/images/bg.png)] bg-no-repeat bg-cover flex flex-col  items-center ">
+    
+      <section className="w-full text-[#3C3C3B] py-16 px-8 md:px-16 flex flex-col items-center">
         {loading && <Loading text="Cargando..." type="spin" />}
         <div className="flex justify-center">
           <Image
@@ -543,7 +543,7 @@ const Register = ({ entity }: props) => {
           )}
         </Form>
       </section>
-    </main>
+    
   );
 };
 
