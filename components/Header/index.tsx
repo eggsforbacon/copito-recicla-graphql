@@ -119,12 +119,12 @@ const Header = () => {
 
         {/* Botón Registrarme (visible en todas las pantallas) */}
         {isBuscador ? (
-          <a
+          <link
             href="/formulario"
             className="text-white bg-[#4EB7AF] font-semibold text-xl lg:text-xl px-8 py-2 rounded-3xl hover:bg-teal-600 transition-colors"
           >
             Registrarme
-          </a>
+          </link>
         ) : (
           <Link
             href="/formulario"
