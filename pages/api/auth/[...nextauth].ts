@@ -38,7 +38,7 @@ export default NextAuth({
       return token;
     },
   },
-  secret: process.env.JWT_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     error: '/auth',
     signIn: 'https://copitorecicla.com/reciclaje'
