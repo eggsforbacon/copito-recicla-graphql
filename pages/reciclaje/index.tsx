@@ -200,7 +200,7 @@ const Reciclaje = () => {
 
 
   
-  return <main className='p-6 md:py-16 lg:p-24 min-w-screen min-h-screen box-border bg-[url(/images/bg.png)] bg-no-repeat bg-cover'>
+  return <main className='debug p-6 md:py-16 lg:p-24 min-w-screen min-h-screen box-border bg-[url(/images/bg.png)] bg-no-repeat bg-cover'>
     {
       session && session.user && <p>{session.user.name}</p>
     }

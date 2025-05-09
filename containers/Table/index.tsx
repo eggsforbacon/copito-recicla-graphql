@@ -1,6 +1,6 @@
 "use client"
 
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState, memo, useCallback } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState,  } from 'react';
 import { Button, Input, InputRef, Space, Table, TableColumnsType, TableColumnType } from 'antd';
 import { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
@@ -12,7 +12,8 @@ interface DataType {
   name: string;
   weight: string;
   category: string;
-  city: string
+  city: string;
+  nameEntity: string
 }
 
 type DataIndex = keyof DataType;
@@ -162,7 +163,7 @@ const TableData = forwardRef((props, ref) => {
       dataIndex: 'nameEntity',
       key: 'nameEntity',
       width: '40vw',
-      ...getColumnSearchProps('name'),
+      ...getColumnSearchProps('nameEntity'),
     },
     {
       title: 'Reciclado',
@@ -180,5 +181,5 @@ const TableData = forwardRef((props, ref) => {
   }
   </>
 })
-
+TableData.displayName = 'TableData';
 export default TableData;

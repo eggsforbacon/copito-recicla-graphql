@@ -62,3 +62,9 @@ body {
     line-height: 2rem !important;
   }
 }
+
+@layer base {
+  .debug {
+    border: solid 1px magenta;
+  }
+}
