@@ -29,4 +29,5 @@ WORKDIR /app
 COPY --from=builder /app ./
 EXPOSE 3000
 
+# Comando para correr la aplicación
 CMD ["npm", "start"]
