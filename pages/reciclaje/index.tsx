@@ -5,7 +5,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FilterDropdownProps } from "antd/es/table/interface";
 import { Eye, PlusSquare } from "react-bootstrap-icons";
-import { Button, Input, InputNumber, Space, Table, TableColumnsType, TableColumnType, message } from "antd";
+import { Button, Input, InputNumber, Space, Table, TableColumnsType, TableColumnType, message, InputRef } from "antd";
 import Link from "next/link";
 
 import Loading from "@/components/Loading";
@@ -31,7 +31,7 @@ const Reciclaje = () => {
   const [tokenInput, setTokenInput] = useState("");
   const [isTokenSent, setIsTokenSent] = useState(false);
   const [searchedColumn, setSearchedColumn] = useState("");
-  const searchInput = useRef<any>(null);
+  const searchInput = useRef<InputRef>(null);
   const [searchText, setSearchText] = useState("");
 
   const { entities, loading: loadingEntities, refetch } = useQueryEntityByRecicling();

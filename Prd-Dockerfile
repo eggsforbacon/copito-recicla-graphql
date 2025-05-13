@@ -4,20 +4,35 @@ FROM node:20-alpine AS builder
 # Configura el directorio de trabajo en el contenedor
 WORKDIR /app
 
+# Instala dependencias del SO necesarias para Prisma
+RUN apk add --no-cache openssl openssl-dev libc6-compat
+
 # Copia el archivo de dependencias y las instala
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Copia el schema y genera Prisma Client
+COPY prisma ./prisma
+RUN npx prisma generate
+
 # Copia el código fuente y construye el proyecto
 COPY . .
-RUN npm run docker:start
 RUN npm run build
 
 # Configura el entorno de producción
-FROM node:20-alpine
+FROM node:20-alpine AS runner
 WORKDIR /app
+
+# Instala libs de Prisma en runtime
+RUN apk add --no-cache openssl libc6-compat
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 COPY --from=builder /app ./
 EXPOSE 3000
+
+# Aplica migraciones de forma no interactiva y arranca la app
+RUN npx prisma migrate deploy
 
 # Comando para correr la aplicación
 CMD ["npm", "start"]

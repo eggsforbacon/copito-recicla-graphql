@@ -86,7 +86,7 @@ export const reciclyngResolver = {
 
       const newRecycling = await prisma.reciclyng.create({
         data: {
-          weight: tokenRecord.weight,
+          weight: tokenRecord.weight!,
           entityId: tokenRecord.entityId,
         },
       });
