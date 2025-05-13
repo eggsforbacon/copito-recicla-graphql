@@ -11,7 +11,7 @@ type InputEntity = {
 type entityByReciclingType = {
   id: number;
   name: string;
-  weight: string;
+  weight: number;
   city: string;
   category: "JAC" | "CE";
   nameEntity: string;
@@ -26,7 +26,7 @@ type EntityToW = {
   reciclyng: {
     id: number;
     createdAt: Date;
-    weight: string;
+    weight: number;
     entityId: number;
   }[];
 };
@@ -54,7 +54,7 @@ export const entityResolvers = {
         const weight = entity.reciclyng.reduce(
           (sum, reciclyng) => +sum + +reciclyng.weight,
           0,
-        ).toString();
+        );
         entityByWeight.push({
           id: entity.id,
           name: entity.name,

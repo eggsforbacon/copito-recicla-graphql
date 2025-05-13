@@ -10,6 +10,7 @@ RUN npm ci
 
 # Copia el código fuente y construye el proyecto
 COPY . .
+RUN npm run docker:start
 RUN npm run build
 
 # Configura el entorno de producción
