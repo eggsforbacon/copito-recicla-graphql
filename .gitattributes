@@ -1,0 +1,4 @@
+cat << 'EOF' > .gitattributes
+Dockerfile text eol=lf
+Prd-Dockerfile text eol=lf
+EOF

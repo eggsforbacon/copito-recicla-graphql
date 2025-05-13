@@ -13,7 +13,7 @@ RUN npm ci
 COPY . .
 
 # Corre el build (incluye prisma generate vía prebuild)
-RUN ["npm","run","build"]
+RUN npm run build
 
 # Etapa de producción
 FROM node:20-alpine AS runner
