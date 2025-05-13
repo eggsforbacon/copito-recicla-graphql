@@ -19,7 +19,7 @@ ARG NEXTAUTH_URL=https://copitorecicla.com
 ENV NEXTAUTH_URL=$NEXTAUTH_URL
 
 # Etapa de producción
-FROM node:20-alpine
+FROM node:20-alpine AS runner
 
 # Instala libs para Prisma en runtime
 RUN apk add --no-cache openssl libc6-compat
