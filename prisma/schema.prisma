@@ -41,6 +41,7 @@ model Entity {
   committee         Boolean? @default(false)
   attachment        String?
   reciclyng         Reciclyng[]
+  tokens            Token[] 
   createdAt DateTime @default(now())
 }
 
@@ -51,8 +52,21 @@ enum CATEGORY {
 
 model Reciclyng {
   id        Int   @id @default(autoincrement())
-  weight    String
+  weight    Float
   entityId  Int
   entity    Entity     @relation(fields: [entityId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model Token {
+  id           Int      @id @default(autoincrement())
+  token        String   @unique
+  email        String
+  entityId     Int
+  entity       Entity   @relation(fields: [entityId], references: [id])
+  weight       Float?
+  data         Json?
+  isUsed       Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
 }

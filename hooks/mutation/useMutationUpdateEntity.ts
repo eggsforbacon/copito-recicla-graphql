@@ -1,20 +1,58 @@
 import { useMutation } from "@apollo/client";
-
 import { EntityType } from "@/types/entity";
-import { FETCH_MUTATION_UPDATE_ENTITY } from "@/graphql/mutation/fetchEntity";
+import {
+  FETCH_MUTATION_UPDATE_ENTITY,
+  FETCH_MUTATION_GENERATE_ENTITY_TOKEN,
+  FETCH_MUTATION_CONFIRM_ENTITY_TOKEN,
+} from "@/graphql/mutation/fetchEntity";
 
 export const useMutationUpdateEntity = () => {
-  const [updateEntity, { loading }] = useMutation(FETCH_MUTATION_UPDATE_ENTITY);
+  const [updateEntity, { loading: loadingUpdate }] = useMutation(FETCH_MUTATION_UPDATE_ENTITY);
+  const [generateToken, { loading: loadingToken }] = useMutation(FETCH_MUTATION_GENERATE_ENTITY_TOKEN);
+  const [confirmToken, { loading: loadingConfirm }] = useMutation(FETCH_MUTATION_CONFIRM_ENTITY_TOKEN);
 
   const useHandleUpdateEntity = async (data: EntityType) => {
-    return await updateEntity({
+    if (!data.id) {
+      throw new Error("El campo 'id' es requerido para actualizar la entidad.");
+    }
+    return await updateEntity({ //
       variables: {
         input: {
-          ...data
-        }
-      }
-    })
+          ...data,
+          id: Number(data.id),
+        },
+      },
+    });
   };
 
-  return { useHandleUpdateEntity, loading };
+  const useHandleGenerateEntityToken = async (data: EntityType) => {
+    if (!data.id) {
+      throw new Error("El campo 'id' es requerido para generar el token.");
+    }
+    return await generateToken({
+      variables: {
+        input: {
+          ...data,
+          id: Number(data.id),
+        },
+      },
+    });
+  };
+
+  const useHandleConfirmEntityToken = async (token: string) => {
+    return await confirmToken({
+      variables: {
+        token,
+      },
+    });
+  };
+
+  return {
+    useHandleUpdateEntity,
+    useHandleGenerateEntityToken,
+    useHandleConfirmEntityToken,
+    loadingUpdate,
+    loadingToken,
+    loadingConfirm,
+  };
 };

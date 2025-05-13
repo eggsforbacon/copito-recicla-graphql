@@ -27,6 +27,7 @@
     "next": "^15.3.1",
     "next-auth": "^4.24.10",
     "next-transpile-modules": "^10.0.1",
+    "nodemailer": "^6.10.1",
     "prisma": "^5.22.0",
     "rc-pagination": "^4.3.0",
     "rc-util": "^5.43.0",
@@ -35,6 +36,7 @@
     "react-dom": "18",
     "react-highlight-words": "^0.20.0",
     "react-loading": "^2.0.3",
+    "react-markdown": "^10.1.0",
     "swiper": "^11.1.15"
   },
   "devDependencies": {
@@ -43,6 +45,7 @@
     "@types/micro-cors": "^0.1.5",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.17.32",
+    "@types/nodemailer": "^6.4.17",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18",
     "@types/react-highlight-words": "^0.20.0",

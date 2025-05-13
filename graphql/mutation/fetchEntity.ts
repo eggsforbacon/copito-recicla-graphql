@@ -47,4 +47,38 @@ export const FETCH_MUTATION_UPDATE_ENTITY = gql`
       attachment
     }
   }
-`
+`;
+
+export const FETCH_MUTATION_GENERATE_ENTITY_TOKEN = gql`
+  mutation GenerateEntityUpdateToken($input: EntityInputUpdate!) {
+    generateEntityUpdateToken(input: $input) {
+      message
+    }
+  }
+`;
+
+export const FETCH_MUTATION_CONFIRM_ENTITY_TOKEN = gql`
+  mutation ConfirmEntityUpdateToken($token: String!) {
+    confirmEntityUpdateToken(token: $token) {
+      id
+      name
+      nameEntity
+      category
+      email
+      city
+      neighborhood
+      commune
+      position
+      address
+      phone
+      acopio
+      acopioName
+      prae
+      praeName
+      proceda
+      procedaProject
+      committee
+      attachment
+    }
+  }
+`;

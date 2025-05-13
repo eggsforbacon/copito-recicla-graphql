@@ -4,33 +4,29 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "react-bootstrap-icons";
 import Link from "next/link";
-import { Search } from "lucide-react";
+
 import Layout from "@/components/layout";
 
 export default function Galeria() {
   const [current, setCurrent] = useState(0);
 
   const images = [
-    "/images/gallery/im2.JPG",
-    "/images/gallery/im3.JPG",
+    "/images/gallery/im1.JPEG",
+    "/images/gallery/im2.JPEG",
+    "/images/gallery/im3.JPEG",
     "/images/gallery/im4.JPG",
-    "/images/gallery/im5.JPG",
-    "/images/gallery/im6.JPG",
-    "/images/gallery/im7.JPG",
-    "/images/gallery/im8.JPG",
-    "/images/gallery/im9.JPG",
-    "/images/gallery/img10.JPG",
-    "/images/gallery/img11.JPG",
-    "/images/gallery/image12.JPG",
-    "/images/gallery/image13.JPG",
-    "/images/gallery/imagen14.JPG",
+    "/images/gallery/im5.JPEG",
+    "/images/gallery/im6.JPEG",
+    "/images/gallery/im7.JPEG",
+    "/images/gallery/im8.JPEG",
+    "/images/gallery/im9.JPEG",
+    "/images/gallery/im10.JPEG",
+    "/images/gallery/im11.JPEG",
+    "/images/gallery/im12.JPEG",
+    "/images/gallery/im13.JPG",
+    "/images/gallery/im14.JPG",
     "/images/gallery/im15.JPG",
-    "/images/gallery/im16.JPG",
-    "/images/gallery/im17.JPG",
-    "/images/gallery/im18.JPG",
-    "/images/gallery/im19.JPG",
-    "/images/gallery/im20.JPG",
-    "/images/gallery/im22.JPG",
+   
   ];
 
   const nextSlide = () => {
@@ -71,7 +67,7 @@ export default function Galeria() {
               <Image
                 src={images[current]}
                 alt="Gallery Image"
-                width={750}
+                width={650}
                 height={600}
                 quality={100}
                 className="object-cover rounded-xl shadow-lg z-10"
@@ -90,20 +86,10 @@ export default function Galeria() {
             {/* Buscador */}
             <div className="max-w-7xl flex justify-center mt-6 gap-4 py-6 lg:hidden">
               <div className="flex flex-col items-center gap-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="¡Consulta cuanto llevas!"
-                    className="bg-[#B6E6E2] text-white placeholder-gray-400 text-center border border-white/50 rounded-full px-10 py-4 pr-10 w-72 focus:outline-none focus:ring-2 focus:ring-white/80"
-                  />
-                  <Search
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white"
-                    size={20}
-                  />
-                </div>
+                
                 <Link href="/buscador">
                   <button className="bg-[#2E3A59] text-white font-bold px-8 py-4 rounded-full hover:bg-[#3E4A69] transition-colors">
-                    Buscar
+                  ¡Consulta cuanto llevas!
                   </button>
                 </Link>
               </div>
@@ -111,13 +97,13 @@ export default function Galeria() {
           </section>
 
           {/* Logo flotante */}
-          <div className="fixed bottom-0 left-0 z-50 hidden lg:block">
+          <div className="fixed bottom-0 left-0 z-50 hidden lg:block ">
             <Image
               src="/images/logo-g1.png"
               alt="Logo Inferior"
               width={300}
               height={400}
-              className="object-contain"
+              className="object-contain "
               priority
             />
           </div>

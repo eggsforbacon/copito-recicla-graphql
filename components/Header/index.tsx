@@ -10,16 +10,14 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isBuscador = pathname === '/buscador';
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    console.log("Término de búsqueda:", value); // Para depuración
-  };
+ 
 
   // Definir los enlaces base
   const baseLinks = [
     { label: "Inicio", href: "/" },
     { label: "Galería", href: "/galeria" },
     { label: "Noticia", href: "/noticia" },
+    { label: "Agrega tu reciclaje", href: "/reciclaje" },
   ];
 
   // Todos los enlaces estarán en el menú desplegable en móviles
@@ -33,7 +31,7 @@ const Header = () => {
   return (
     <header className="w-full bg-transparent py-4 flex items-center justify-between px-4 lg:px-12 fixed top-0 left-0 z-50">
       {/* Izquierda: Icono de Menú (móviles) y Buscador (escritorio) */}
-      <div className="flex items-center gap-2 md:gap-4 px-2 md:px-10">
+      <div className="  flex items-center gap-2  px-2 md:px-4">
         {/* Icono de Menú Hamburguesa (móviles) */}
         <button onClick={toggleMenu} className="text-black lg:hidden">
           {isMenuOpen ? <X size={40} /> : <Menu size={50} />}
@@ -44,29 +42,24 @@ const Header = () => {
           <div className="hidden lg:flex items-center gap-4">
             <Link
               href="/buscador"
-              className={`relative text-white bg-[#243A48] px-4 py-3 rounded-full font-semibold text-base hover:text-white/80 transition-colors ${
+              className={`relative xl:text-xl lg:text-lg md:text-base text-white bg-[#243A48] px-4 py-3 rounded-full font-semibold  hover:text-white/80 transition-colors ${
                 pathname === "/buscador" ? "active-link" : ""
               }`}
             >
-              Buscar
+              ¡Consulta cuanto llevas!
             </Link>
-            <input
-              type="text"
-              onChange={handleSearchChange}
-              placeholder="¡Consulta cuanto llevas!"
-              className="px-4 py-3 text-center rounded-3xl bg-[#B6E6E2] text-gray-900 text-base placeholder-black-50 focus:outline-none focus:ring-2 w-[250px]"
-            />
+           
           </div>
         )}
       </div>
 
       {/* Derecha: Navegación */}
-      <nav className="flex items-center gap-4 md:gap-8">
+      <nav className="flex   items-center gap-8 md:gap-4 lg:gap-6 xl:gap-12">
         {/* Enlaces para escritorio */}
-        <div className="hidden lg:flex gap-4 px-2 lg:gap-8 lg:px-10">
+        <div className="hidden lg:flex gap-2 px-2 lg:gap-4 xl:gap-8 lg:px-2 xl:px-10">
           {baseLinks.map((link, index) =>
             isBuscador ? (
-              <a
+              <Link
                 key={index}
                 href={link.href}
                 className={`relative text-black font-normal text-sm lg:text-2xl md:text-2xl hover:border-b-4 border-white transition-colors ${
@@ -74,7 +67,7 @@ const Header = () => {
                 }`}
               >
                 {link.label}
-              </a>
+              </Link>
             ) : (
               <Link
                 key={index}
@@ -95,14 +88,14 @@ const Header = () => {
             {dropdownLinks.map((link, index) => {
               const bgColors = ['bg-[#4EB7AF]', 'bg-[#4EB7AF]', 'bg-[#4EB7AF]'];
               return isBuscador ? (
-                <a
+                <Link
                   key={index}
                   href={link.href}
                   className={`text-white font-medium text-lg text-center py-2 px-4 rounded-full ${bgColors[index % bgColors.length]} hover:opacity-80 transition`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}
-                </a>
+                </Link>
               ) : (
                 <Link
                   key={index}
@@ -119,16 +112,16 @@ const Header = () => {
 
         {/* Botón Registrarme (visible en todas las pantallas) */}
         {isBuscador ? (
-          <a
+          <Link
             href="/formulario"
-            className="text-white bg-[#4EB7AF] font-semibold text-xl lg:text-xl px-8 py-2 rounded-3xl hover:bg-teal-600 transition-colors"
+            className="text-white bg-[#4EB7AF] font-semibold text-xl lg:text-xl px-8 xl:px-8 lg:px-4 py-2 rounded-3xl hover:bg-teal-600 transition-colors"
           >
             Registrarme
-          </a>
+          </Link>
         ) : (
           <Link
             href="/formulario"
-            className="text-white bg-[#4EB7AF] font-semibold text-xl lg:text-xl px-8 py-2 rounded-3xl hover:bg-teal-600 transition-colors"
+            className="text-white bg-[#4EB7AF] font-semibold text-xl lg:text-xl px-8 xl:px-8 lg:px-4 py-2 rounded-3xl hover:bg-teal-600 transition-colors"
           >
             Registrarme
           </Link>

@@ -63,3 +63,24 @@ export type EntityTypeGet = {
   attachment: string,
   nameEntity?: string ,
 }
+
+export interface EntityUpdateData {
+  name?: string;
+  nameEntity?: string;
+  category?: "JAC" | "CE";
+  email?: string;
+  city?: string;
+  neighborhood?: string;
+  commune?: number;
+  position?: string;
+  address?: string;
+  phone?: string;
+  acopio?: boolean;
+  acopioName?: string;
+  prae?: boolean;
+  praeName?: string;
+  proceda?: boolean;
+  procedaProject?: string;
+  committee?: boolean;
+  attachment?: string;
+}

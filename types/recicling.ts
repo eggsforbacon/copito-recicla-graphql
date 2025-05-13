@@ -1,5 +1,5 @@
 export type reciclyngType = {
   id?: number;
-  weight: string;
+  weight: number;
   entityId: number;
 }

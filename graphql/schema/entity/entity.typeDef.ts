@@ -46,14 +46,14 @@ export const EntityTypeDefs = gql`
   }
 
   input EntityInputUpdate {
-    id: ID!
-    name: String!
-    nameEntity: String!
+    id: Int!
+    name: String
+    nameEntity: String
     category: CATEGORY
-    email: String!
-    city: String!
+    email: String
+    city: String
     neighborhood: String
-    commune: Int!
+    commune: Int
     position: String
     address: String
     phone: String
@@ -64,7 +64,11 @@ export const EntityTypeDefs = gql`
     proceda: Boolean
     procedaProject: String
     committee: Boolean
-    attachment: String!
+    attachment: String
+  }
+
+  type TokenResponse {
+    message: String!
   }
 
   type OutEntityByRecicling {
@@ -79,16 +83,18 @@ export const EntityTypeDefs = gql`
   type Query {
     findAllEntities: [Entity!]!
     findEntity(id: Int!): Entity
-    findAllEntitiesByReciclyn:  [OutEntityByRecicling!]!
+    findAllEntitiesByReciclyn: [OutEntityByRecicling!]!
   }
 
   type Mutation {
     createEntity(input: EntityInput!): Entity
     updateEntity(input: EntityInputUpdate!): Entity
+    generateEntityUpdateToken(input: EntityInputUpdate!): TokenResponse!
+    confirmEntityUpdateToken(token: String!): Entity!
   }
 
   enum CATEGORY {
     JAC
     CE
   }
-`
+`;
