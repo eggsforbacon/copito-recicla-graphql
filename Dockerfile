@@ -1,44 +1,44 @@
 # Establece la imagen base
 FROM node:20-alpine AS builder
-
-# Configura el directorio de trabajo en el contenedor
 WORKDIR /app
 
-# Instala dependencias del SO necesarias para Prisma
+# Instala libs para Prisma
 RUN apk add --no-cache openssl openssl-dev libc6-compat
 
-# Copia el archivo de dependencias y las instala
+# Copia deps e instala
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copia el schema y genera Prisma Client
-COPY prisma ./prisma
-RUN npx prisma generate
-
-# Copia el código fuente y construye el proyecto
+# Copia todo el código
 COPY . .
+
+# Build (incluye prisma generate a través de prebuild)
 RUN npm run build
 
 ARG NEXTAUTH_URL=https://copitorecicla.com
 ENV NEXTAUTH_URL=$NEXTAUTH_URL
 
-# Configura el entorno de producción
+# Etapa de producción
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Instala libs de Prisma en runtime
+# Instala libs para Prisma en runtime
 RUN apk add --no-cache openssl libc6-compat
 
+# Solo deps de producción
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
+
+# Copia artefactos
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+
+ENV NODE_ENV=production
+
 EXPOSE 3000
 
-# Aplica migraciones de forma no interactiva y arranca la app
+# Aplica migraciones y lanza
 RUN npx prisma migrate deploy
-
-# Comando para correr la aplicación
 CMD ["npm", "start"]
