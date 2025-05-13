@@ -19,26 +19,14 @@ ARG NEXTAUTH_URL=https://copitorecicla.com
 ENV NEXTAUTH_URL=$NEXTAUTH_URL
 
 # Etapa de producción
-FROM node:20-alpine AS runner
-WORKDIR /app
+FROM node:20-alpine
 
 # Instala libs para Prisma en runtime
 RUN apk add --no-cache openssl libc6-compat
+WORKDIR /app
 
 # Solo deps de producción
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
-
-# Copia artefactos
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/prisma ./prisma
-
-ENV NODE_ENV=production
-
+COPY --from=builder /app ./
 EXPOSE 3000
 
-# Aplica migraciones y lanza
-RUN npx prisma migrate deploy
 CMD ["npm", "start"]
