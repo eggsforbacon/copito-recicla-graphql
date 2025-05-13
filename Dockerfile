@@ -13,13 +13,13 @@ RUN npm ci
 COPY . .
 
 # Build (incluye prisma generate a través de prebuild)
-RUN npm run build
+RUN ["npm","run","build"]
 
 ARG NEXTAUTH_URL=https://copitorecicla.com
 ENV NEXTAUTH_URL=$NEXTAUTH_URL
 
 # Etapa de producción
-FROM node:20-alpine AS runner
+FROM node:20-alpine
 
 # Instala libs para Prisma en runtime
 RUN apk add --no-cache openssl libc6-compat
