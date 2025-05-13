@@ -50,7 +50,7 @@ export const entityResolvers = {
 
       const entityByWeight: entityByReciclingType[] = [];
 
-      entities.forEach((entity: EntityToW) => {
+      entities.forEach((entity) => {
         const weight = entity.reciclyng.reduce(
           (sum, reciclyng) => sum + reciclyng.weight,
           0,
