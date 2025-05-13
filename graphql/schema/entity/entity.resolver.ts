@@ -52,7 +52,7 @@ export const entityResolvers = {
 
       entities.forEach((entity) => {
         const weight = entity.reciclyng.reduce(
-          (sum, reciclyng) => sum + reciclyng.weight,
+          (sum, reciclyng) => +sum + +reciclyng.weight,
           0,
         ).toString();
         entityByWeight.push({
