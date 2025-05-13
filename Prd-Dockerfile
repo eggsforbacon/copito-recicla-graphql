@@ -32,12 +32,6 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 
-ENV NODE_ENV=production
-ARG NEXTAUTH_URL=https://copitorecicla.com
-ENV NEXTAUTH_URL=$NEXTAUTH_URL
-
 EXPOSE 3000
 
-# Aplica migraciones y arranca la app
-RUN npx prisma migrate deploy
 CMD ["npm", "start"]
