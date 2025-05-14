@@ -47,7 +47,10 @@ jobs:
           echo 'POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}' >> /home/${{ secrets.VPS_USER }}/copito/.env && \
           echo 'POSTGRES_DB=${{ secrets.POSTGRES_DB }}' >> /home/${{ secrets.VPS_USER }}/copito/.env && \
           echo 'NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}' >> /home/${{ secrets.VPS_USER }}/copito/.env && \
-          echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> /home/${{ secrets.VPS_USER }}/copito/.env"
+          echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> /home/${{ secrets.VPS_USER }}/copito/.env" && \
+          echo 'NODEMAILER_HOST_EMAIL=${{ secrets.NODEMAILER_HOST }}' >> /home/${{ secrets.VPS_USER }}/copito/.env" && \
+          echo 'NODEMAILER_APP_PASS=${{ secrets.NODEMAILER_APP_PASS }}' >> /home/${{ secrets.VPS_USER }}/copito/.env" && \
+          echo 'NODEMAILER_HOST_PASS=${{ secrets.NODEMAILER_HOST_PASS }}' >> /home/${{ secrets.VPS_USER }}/copito/.env" 
           
       - name: Push files and images to VPS
         run: |
