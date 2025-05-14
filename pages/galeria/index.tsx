@@ -11,21 +11,21 @@ export default function Galeria() {
   const [current, setCurrent] = useState(0);
 
   const images = [
-    "/images/gallery/im1.JPEG",
-    "/images/gallery/im2.JPEG",
-    "/images/gallery/im3.JPEG",
-    "/images/gallery/im4.JPG",
-    "/images/gallery/im5.JPEG",
-    "/images/gallery/im6.JPEG",
-    "/images/gallery/im7.JPEG",
-    "/images/gallery/im8.JPEG",
-    "/images/gallery/im9.JPEG",
-    "/images/gallery/im10.JPEG",
-    "/images/gallery/im11.JPEG",
-    "/images/gallery/im12.JPEG",
-    "/images/gallery/im13.JPG",
-    "/images/gallery/im14.JPG",
-    "/images/gallery/im15.JPG",
+    "/images/gallery/im1.jpeg",
+    "/images/gallery/im2.jpeg",
+    "/images/gallery/im3.jpeg",
+    "/images/gallery/im4.jpg",
+    "/images/gallery/im5.jpeg",
+    "/images/gallery/im6.jpeg",
+    "/images/gallery/im7.jpeg",
+    "/images/gallery/im8.jpeg",
+    "/images/gallery/im9.jpeg",
+    "/images/gallery/im10.jpeg",
+    "/images/gallery/im11.jpeg",
+    "/images/gallery/im12.jpeg",
+    "/images/gallery/im13.jpg",
+    "/images/gallery/im14.jpg",
+    "/images/gallery/im15.jpg",
    
   ];
 
