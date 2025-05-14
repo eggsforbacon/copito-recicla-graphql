@@ -10,7 +10,6 @@ import Link from "next/link";
 
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuth";
-import Register from "@/containers/Register";
 import { useQueryEntityByRecicling } from "@/hooks/queries/useQueryEntityByRecicling";
 import { useMutationReciclyn } from "@/hooks/mutation/useMutationReciclyn";
 import Layout from "@/components/layout";
@@ -292,9 +291,9 @@ const Reciclaje = () => {
           </section>
         )}
 
-        <div className="flex flex-col w-full">
-          <Register />
-          <section className="w-11/12 mx-auto mb-4">
+        <div className="flex flex-col w-full mt-20">
+          
+          <section className="w-11/12 mx-auto my-4">
             {loadingEntities ? (
               <div className="min-h-[300px] flex justify-center items-center">
                 <Loading text="Cargando datos..." type="bars" />

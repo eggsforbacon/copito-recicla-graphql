@@ -16,7 +16,7 @@ const Header = () => {
   const baseLinks = [
     { label: "Inicio", href: "/" },
     { label: "Galería", href: "/galeria" },
-    { label: "Noticia", href: "/noticia" },
+    { label: "Noticias", href: "/noticias" },
     { label: "Agrega tu reciclaje", href: "/reciclaje" },
   ];
 
@@ -29,7 +29,9 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full bg-transparent py-4 flex items-center justify-between px-4 lg:px-12 fixed top-0 left-0 z-50">
+    <header className={`w-full ${
+        pathname === "/" ? "bg-transparent" : "bg-[#fff]/30 backdrop-blur-md"}
+         py-4 flex items-center justify-between px-4 lg:px-12 fixed top-0 left-0 z-50`}>
       {/* Izquierda: Icono de Menú (móviles) y Buscador (escritorio) */}
       <div className="  flex items-center gap-2  px-2 md:px-4">
         {/* Icono de Menú Hamburguesa (móviles) */}
