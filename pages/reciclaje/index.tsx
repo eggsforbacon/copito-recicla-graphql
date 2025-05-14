@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Register from "@/containers/Register";
 import { useQueryEntityByRecicling } from "@/hooks/queries/useQueryEntityByRecicling";
 import { useMutationReciclyn } from "@/hooks/mutation/useMutationReciclyn";
+import Layout from "@/components/layout";
 
 interface DataType {
   key: string;
@@ -223,86 +224,96 @@ const Reciclaje = () => {
     },
   ];
 
-  return (
-    <main className="bg-[url(/images/bg.png)] bg-cover flex flex-col items-center p-4">
-      {/* Modal para agregar/restar kilos */}
-      {showFormSum && (
-        <section
-          className="fixed left-0 top-0 w-screen h-screen bg-black/50 z-20 flex justify-center items-center"
-          onClick={() => setShowFormSum(false)}
-        >
-          <section
-            className="px-6 w-[90%] md:w-96 h-80 rounded-3xl bg-white flex flex-col justify-center items-center relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowFormSum(false)}
-              className="absolute top-3 right-4 text-gray-500 hover:text-gray-700"
-            >
-              X
-            </button>
-            <h2 className="text-xl font-bold text-black/50 pt-10">
-              {isTokenSent ? "Confirmar token" : "Agregar o restar kilos"}
-            </h2>
-            <section className="w-full m-auto flex flex-col gap-3 items-center justify-center">
-              {!isTokenSent ? (
-                <>
-                  <InputNumber
-                    value={weightUpdate}
-                    onChange={(value) => value !== null && setWeightUpdate(value)}
-                    addonAfter={<>KL</>}
-                    style={{ width: "50%" }}
-                  />
-                  <span className="text-lg font-semibold text-black/80">
-                    Total: {formUpdate.currentWeight + weightUpdate} KL
-                  </span>
-                </>
-              ) : (
-                <Input
-                  value={tokenInput}
-                  onChange={(e) => setTokenInput(e.target.value)}
-                  placeholder="Ingrese el token para guardar cambios"
-                  style={{ width: "80%" }}
-                />
-              )}
-            </section>
-            <div className="flex gap-3}">
-              {!isTokenSent ? (
-                <Button
-                  onClick={handleAddRecycling}
-                  loading={loadingToken}
-                  className="bg-green-500 px-5 py-5 mb-4 text-white rounded-xl"
-                >
-                  Aplicar
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleConfirmToken}
-                  loading={loadingConfirm}
-                  className="bg-blue-500 px-5 py-5 mb-4 text-white rounded-xl"
-                >
-                  Confirmar
-                </Button>
-              )}
-            </div>
-          </section>
-        </section>
-      )}
+  return (<Layout>
+    <>
 
-      <div className="flex flex-col w-full">
-        <Register />
-        <section className="w-11/12 mx-auto mb-4">
-          {loadingEntities ? (
-            <div className="min-h-[300px] flex justify-center items-center">
-              <Loading text="Cargando datos..." type="bars" />
-            </div>
-          ) : (
-            <Table<DataType> columns={columns} dataSource={entities} />
-          )}
-        </section>
-      </div>
-    </main>
+      <main className="bg-[url(/images/bg.png)] bg-cover flex flex-col items-center p-4">
+        {/* Modal para agregar/restar kilos */}
+        {showFormSum && (
+          <section
+            className="fixed left-0 top-0 w-screen h-screen bg-black/50 z-20 flex justify-center items-center"
+            onClick={() => setShowFormSum(false)}
+          >
+            <section
+              className="px-6 w-[90%] md:w-96 h-80 rounded-3xl bg-white flex flex-col justify-center items-center relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowFormSum(false)}
+                className="absolute top-3 right-4 text-gray-500 hover:text-gray-700"
+              >
+                X
+              </button>
+              <h2 className="text-xl font-bold text-black/50 pt-10">
+                {isTokenSent ? "Confirmar token" : "Agregar o restar kilos"}
+              </h2>
+              <section className="w-full m-auto flex flex-col gap-3 items-center justify-center">
+                {!isTokenSent ? (
+                  <>
+                    <InputNumber
+                      value={weightUpdate}
+                      onChange={(value) => value !== null && setWeightUpdate(value)}
+                      addonAfter={<>KL</>}
+                      style={{ width: "50%" }}
+                    />
+                    <span className="text-lg font-semibold text-black/80">
+                      Total: {formUpdate.currentWeight + weightUpdate} KL
+                    </span>
+                  </>
+                ) : (
+                  <Input
+                    value={tokenInput}
+                    onChange={(e) => setTokenInput(e.target.value)}
+                    placeholder="Ingrese el token para guardar cambios"
+                    style={{ width: "80%" }}
+                  />
+                )}
+              </section>
+              <div className="flex gap-3}">
+                {!isTokenSent ? (
+                  <Button
+                    onClick={handleAddRecycling}
+                    loading={loadingToken}
+                    className="bg-green-500 px-5 py-5 mb-4 text-white rounded-xl"
+                  >
+                    Aplicar
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleConfirmToken}
+                    loading={loadingConfirm}
+                    className="bg-blue-500 px-5 py-5 mb-4 text-white rounded-xl"
+                  >
+                    Confirmar
+                  </Button>
+                )}
+              </div>
+            </section>
+          </section>
+        )}
+
+        <div className="flex flex-col w-full">
+          <Register />
+          <section className="w-11/12 mx-auto mb-4">
+            {loadingEntities ? (
+              <div className="min-h-[300px] flex justify-center items-center">
+                <Loading text="Cargando datos..." type="bars" />
+              </div>
+            ) : (
+              <Table<DataType>
+                columns={columns}
+                dataSource={entities}
+                scroll={{ x: 'max-content' }}
+              />
+            )}
+          </section>
+        </div>
+      </main>
+
+    </>
+  </Layout>
   );
+
 };
 
 export default Reciclaje;
