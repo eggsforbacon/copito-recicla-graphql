@@ -3,6 +3,9 @@ import prisma from "@/prisma";
 import { EntityType, EntityTypeUp, EntityUpdateData } from "@/types/entity";
 import { sendTokenEmail } from "@/utils/sendEmail";
 import { randomBytes } from "crypto";
+import { sendDeleteTokenEmail } from "@/utils/sendEmail";
+
+const NODEMAILER_HOST_EMAIL = process.env.NODEMAILER_HOST_EMAIL;
 
 type InputEntity = {
   input: EntityType;
@@ -53,7 +56,7 @@ export const entityResolvers = {
       entities.forEach((entity) => {
         const weight = entity.reciclyng.reduce(
           (sum, reciclyng) => +sum + +reciclyng.weight,
-          0,
+          0
         );
         entityByWeight.push({
           id: entity.id,
@@ -70,14 +73,14 @@ export const entityResolvers = {
 
     findEntity: async (
       _parent: unknown,
-      args: { id: number },
+      args: { id: number }
     ): Promise<EntityType | null> => await findEntity(args.id),
   },
 
   Mutation: {
     createEntity: async (
       _: unknown,
-      args: EntityTypeUp,
+      args: EntityTypeUp
     ): Promise<EntityType> => {
       const entityExist = await findEntityByEmail(args.input.email);
       if (entityExist) {
@@ -96,7 +99,7 @@ export const entityResolvers = {
 
     updateEntity: async (
       _: unknown,
-      args: InputEntity,
+      args: InputEntity
     ): Promise<EntityType> => {
       const { id, ...data } = args.input;
 
@@ -112,10 +115,13 @@ export const entityResolvers = {
         where: { id: entityId },
       });
       if (!entity) {
-        throw new UserInputError(`No se encontró una entidad con ID ${entityId}`, {
-          code: 400,
-          status: 400,
-        });
+        throw new UserInputError(
+          `No se encontró una entidad con ID ${entityId}`,
+          {
+            code: 400,
+            status: 400,
+          }
+        );
       }
 
       if (data.email && data.email !== entity.email) {
@@ -132,14 +138,15 @@ export const entityResolvers = {
         where: { id: entityId },
         data: {
           ...data,
-          attachment: data.attachment !== undefined ? data.attachment : entity.attachment,
+          attachment:
+            data.attachment !== undefined ? data.attachment : entity.attachment,
         },
       });
     },
 
     generateEntityUpdateToken: async (
       _: unknown,
-      args: InputEntity,
+      args: InputEntity
     ): Promise<TokenResponse> => {
       const { id, ...data } = args.input;
 
@@ -155,10 +162,13 @@ export const entityResolvers = {
         where: { id: entityId },
       });
       if (!entity) {
-        throw new UserInputError(`No se encontró una entidad con ID ${entityId}`, {
-          code: 400,
-          status: 400,
-        });
+        throw new UserInputError(
+          `No se encontró una entidad con ID ${entityId}`,
+          {
+            code: 400,
+            status: 400,
+          }
+        );
       }
 
       if (data.email && data.email !== entity.email) {
@@ -191,7 +201,7 @@ export const entityResolvers = {
 
     confirmEntityUpdateToken: async (
       _: unknown,
-      args: { token: string },
+      args: { token: string }
     ): Promise<EntityType> => {
       const { token } = args;
 
@@ -253,6 +263,95 @@ export const entityResolvers = {
       });
 
       return updatedEntity;
+    },
+
+    generateDeleteToken: async (
+      _: unknown,
+      args: { id: number },
+    ): Promise<TokenResponse> => {
+      const entityId = Number(args.id);
+      if (isNaN(entityId)) {
+        throw new UserInputError("El ID proporcionado no es un número válido", {
+          code: 400,
+          status: 400,
+        });
+      }
+
+      const entity = await prisma.entity.findUnique({
+        where: { id: entityId },
+      });
+      if (!entity) {
+        throw new UserInputError(`No se encontró una entidad con ID ${entityId}`, {
+          code: 400,
+          status: 400,
+        });
+      }
+
+      const token = randomBytes(16).toString("hex");
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+      await prisma.token.create({
+        data: {
+          token,
+          email: NODEMAILER_HOST_EMAIL || "",
+          entityId,
+          data: undefined,
+          expiresAt,
+        },
+      });
+
+      await sendDeleteTokenEmail(token, entityId);
+
+      return { message: `Token enviado al correo del administrador` };
+    },
+
+    confirmDeleteToken: async (
+      _: unknown,
+      args: { token: string },
+    ): Promise<boolean> => {
+      const { token } = args;
+
+      const tokenRecord = await prisma.token.findUnique({
+        where: { token },
+      });
+
+      if (!tokenRecord) {
+        throw new UserInputError("Token inválido", { code: 400, status: 400 });
+      }
+
+      if (tokenRecord.isUsed) {
+        throw new UserInputError("El token ya ha sido usado", {
+          code: 400,
+          status: 400,
+        });
+      }
+
+      if (new Date() > tokenRecord.expiresAt) {
+        throw new UserInputError("El token ha expirado", {
+          code: 400,
+          status: 400,
+        });
+      }
+
+      const entity = await prisma.entity.findUnique({
+        where: { id: tokenRecord.entityId },
+      });
+      if (!entity) {
+        throw new UserInputError(
+          `No se encontró una entidad con ID ${tokenRecord.entityId}`,
+          { code: 400, status: 400 }
+        );
+      }
+
+      await prisma.token.deleteMany({
+        where: { entityId: tokenRecord.entityId },
+      });
+
+      await prisma.entity.delete({
+        where: { id: tokenRecord.entityId },
+      });
+
+      return true;
     },
   },
 };

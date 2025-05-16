@@ -91,6 +91,8 @@ export const EntityTypeDefs = gql`
     updateEntity(input: EntityInputUpdate!): Entity
     generateEntityUpdateToken(input: EntityInputUpdate!): TokenResponse!
     confirmEntityUpdateToken(token: String!): Entity!
+    generateDeleteToken(id: Int!): TokenResponse!
+   confirmDeleteToken(token: String!): Boolean!
   }
 
   enum CATEGORY {

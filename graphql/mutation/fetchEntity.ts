@@ -82,3 +82,17 @@ export const FETCH_MUTATION_CONFIRM_ENTITY_TOKEN = gql`
     }
   }
 `;
+
+export const FETCH_MUTATION_GENERATE_DELETE_TOKEN = gql`
+  mutation GenerateDeleteToken($id: Int!) {
+    generateDeleteToken(id: $id) {
+      message
+    }
+  }
+`;
+
+export const FETCH_MUTATION_CONFIRM_DELETE_TOKEN = gql`
+  mutation ConfirmDeleteToken($token: String!) {
+    confirmDeleteToken(token: $token)
+  }
+`;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FilterDropdownProps } from "antd/es/table/interface";
@@ -42,6 +42,11 @@ const Reciclaje = () => {
     name: "",
     currentWeight: 0,
   });
+
+  useEffect(() => {
+
+    refetch();
+  }, [refetch]);
 
   if (status === "loading") {
     return <Loading text="Cargando..." type="bars" />;
@@ -292,7 +297,7 @@ const Reciclaje = () => {
         )}
 
         <div className="flex flex-col w-full mt-20">
-          
+
           <section className="w-11/12 mx-auto my-4">
             {loadingEntities ? (
               <div className="min-h-[300px] flex justify-center items-center">

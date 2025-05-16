@@ -15,7 +15,7 @@ import {
 } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import axios from "axios";
-
+import Router from "next/router";
 import { useMutationEntity } from "@/hooks/mutation/useMutationEntity";
 import { EntityType, EntityTypeGet } from "@/types/entity";
 import { useMutationUpdateEntity } from "@/hooks/mutation/useMutationUpdateEntity";
@@ -49,7 +49,10 @@ type dataProps = {
 
 const Register = ({ entity }: props) => {
   const { useHandleCreateEntity } = useMutationEntity();
-  const { useHandleUpdateEntity, useHandleGenerateEntityToken, useHandleConfirmEntityToken, loadingUpdate, loadingToken, loadingConfirm } = useMutationUpdateEntity();
+  const { useHandleUpdateEntity, useHandleGenerateEntityToken, useHandleConfirmEntityToken, loadingUpdate, loadingToken, loadingConfirm, useHandleGenerateDeleteToken,
+    useHandleConfirmDeleteToken,
+    loadingDeleteToken,
+    loadingDeleteConfirm } = useMutationUpdateEntity();
   const [loading, setLoading] = useState<boolean>(false);
   const [category, setCategory] = useState<"JAC" | "CE">(entity?.category ?? "JAC");
   const [attachmentState, setAttachmentState] = useState<File | undefined>();
@@ -57,6 +60,8 @@ const Register = ({ entity }: props) => {
   const [isTokenModalVisible, setIsTokenModalVisible] = useState(false);
   const [tokenInput, setTokenInput] = useState("");
   const [updateData, setUpdateData] = useState<EntityTypeGet | null>(null);
+  const [isDeleteTokenModalVisible, setIsDeleteTokenModalVisible] = useState(false);
+  const [deleteTokenInput, setDeleteTokenInput] = useState("");
 
   useEffect(() => {
     if (entity) {
@@ -229,6 +234,47 @@ const Register = ({ entity }: props) => {
     } catch (error: any) {
       setLoading(false);
       const errorMessage = error.graphQLErrors?.[0]?.message || "Error al validar el token";
+      message.error(errorMessage);
+    }
+  };
+
+  const handleGenerateDeleteToken = async () => {
+    if (!entity?.id) {
+      message.error("No se proporcionó un ID válido para la entidad.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await useHandleGenerateDeleteToken({ id: Number(entity.id) });
+      message.success(response);
+      setIsDeleteTokenModalVisible(true);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      const errorMessage = error.graphQLErrors?.[0]?.message || "Error al generar el token de eliminación";
+      message.error(errorMessage);
+    }
+  };
+
+  const handleConfirmDeleteToken = async () => {
+    if (!deleteTokenInput) {
+      message.warning("Por favor, ingrese el token.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await useHandleConfirmDeleteToken(deleteTokenInput);
+      message.success("Entidad eliminada correctamente. La página ha sido actualizada.");
+      setIsDeleteTokenModalVisible(false);
+      setDeleteTokenInput("");
+      setLoading(false);
+      Router.push('/reciclaje');
+      setAttachmentState(undefined);
+      setCategory("JAC");
+      setUpdateData(null);
+    } catch (error: any) {
+      setLoading(false);
+      const errorMessage = error.graphQLErrors?.[0]?.message || "Error al validar el token de eliminación";
       message.error(errorMessage);
     }
   };
@@ -534,6 +580,21 @@ const Register = ({ entity }: props) => {
                 {entity?.name ? <>Actualizar</> : <>Guardar</>}
               </Button>
             </Form.Item>
+
+            {entity?.name && (
+              <Form.Item className="w-full mt-4" wrapperCol={{ span: 24 }}>
+                <Button
+                  className="w-full md:text-3xl md:py-7 font-bold"
+                  type="default"
+                  danger
+                  onClick={handleGenerateDeleteToken}
+                  loading={loadingDeleteToken}
+                >
+                  Eliminar registro
+                </Button>
+              </Form.Item>
+            )}
+
           </>
         )}
       </Form>
@@ -551,7 +612,7 @@ const Register = ({ entity }: props) => {
         <Input
           value={tokenInput}
           onChange={(e) => setTokenInput(e.target.value)}
-          placeholder="Ingrese el token"
+          placeholder="Ingresa el token"
           style={{ marginBottom: 16 }}
         />
         <Button
@@ -563,6 +624,34 @@ const Register = ({ entity }: props) => {
           Confirmar
         </Button>
       </Modal>
+
+      <Modal
+        title="Confirmar eliminación"
+        open={isDeleteTokenModalVisible}
+        onCancel={() => {
+          setIsDeleteTokenModalVisible(false);
+          setDeleteTokenInput("");
+        }}
+        footer={null}
+      >
+        <p>Se ha enviado un token al correo del administrador. Por favor, ingresalo aquí para confirmar la eliminación.</p>
+        <Input
+          value={deleteTokenInput}
+          onChange={(e) => setDeleteTokenInput(e.target.value)}
+          placeholder="Ingresa el token"
+          style={{ marginBottom: 16 }}
+        />
+        <Button
+          type="primary"
+          danger
+          onClick={handleConfirmDeleteToken}
+          loading={loadingDeleteConfirm}
+          block
+        >
+          Confirmar Eliminación
+        </Button>
+      </Modal>
+
     </section>
   );
 };
