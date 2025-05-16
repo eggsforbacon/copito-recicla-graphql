@@ -4,22 +4,39 @@ import React, { useRef, useState, useEffect } from "react";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FilterDropdownProps } from "antd/es/table/interface";
-import { Eye, PlusSquare } from "react-bootstrap-icons";
-import { Button, Input, InputNumber, Space, Table, TableColumnsType, TableColumnType, message, InputRef } from "antd";
+import { Eye, PlusSquare, Download, FileEarmarkArrowDown } from "react-bootstrap-icons";
+import { Button, Input, InputNumber, Space, Table, TableColumnsType, TableColumnType, message, InputRef, Modal } from "antd";
 import Link from "next/link";
+import * as XLSX from "xlsx";
 
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuth";
 import { useQueryEntityByRecicling } from "@/hooks/queries/useQueryEntityByRecicling";
 import { useMutationReciclyn } from "@/hooks/mutation/useMutationReciclyn";
+import { useMutationDownload } from "@/hooks/mutation/useMutationDownload";
 import Layout from "@/components/layout";
 
 interface DataType {
   key: string;
+  id: string;
   name: string;
   nameEntity: string;
   weight: number;
   category: string;
+  email: string;
+  phone: string;
+  city: string;
+  neighborhood: string;
+  position: string;
+  address: string;
+  acopio: boolean;
+  acopioName: string,
+  prae: boolean;
+  praeName: string;
+  proceda: boolean;
+  procedaProject: string;
+  committee: boolean;
+  commune: number;
 }
 
 type DataIndex = keyof DataType;
@@ -33,9 +50,12 @@ const Reciclaje = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
   const [searchText, setSearchText] = useState("");
+  const [isDownloadModalVisible, setIsDownloadModalVisible] = useState(false);
+  const [downloadTokenInput, setDownloadTokenInput] = useState("");
 
   const { entities, loading: loadingEntities, refetch } = useQueryEntityByRecicling();
   const { HandleGenerateToken, HandleConfirmToken, loadingToken, loadingConfirm } = useMutationReciclyn();
+  const { HandleGenerateDownloadToken, HandleConfirmDownloadToken, loadingToken: loadingDownloadToken, loadingConfirm: loadingConfirmDownload } = useMutationDownload();
 
   const [formUpdate, setFormUpdate] = useState({
     id: 0,
@@ -44,7 +64,6 @@ const Reciclaje = () => {
   });
 
   useEffect(() => {
-
     refetch();
   }, [refetch]);
 
@@ -82,6 +101,61 @@ const Reciclaje = () => {
       setIsTokenSent(false);
       setTokenInput("");
       await refetch();
+    } catch (error: any) {
+      const errorMessage = error.graphQLErrors?.[0]?.message || "Error al validar el token";
+      message.error(errorMessage);
+    }
+  };
+
+  const handleGenerateDownloadTokenClick = async () => {
+    try {
+      const msg = await HandleGenerateDownloadToken();
+      message.success(msg);
+      setIsDownloadModalVisible(true);
+    } catch (error: any) {
+      const errorMessage = error.graphQLErrors?.[0]?.message || "Error al generar el token de descarga";
+      message.error(errorMessage);
+    }
+  };
+
+  const handleConfirmDownloadToken = async () => {
+    if (!downloadTokenInput) {
+      message.warning("Por favor, ingrese el token.");
+      return;
+    }
+    try {
+      const isValid = await HandleConfirmDownloadToken(downloadTokenInput);
+      if (isValid) {
+        // Generar archivo Excel
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(
+          entities.map((entity: DataType) => ({
+            Nombre: entity.name,
+            Entidad: entity.nameEntity,
+            Categoría: entity.category,
+            Email: entity.email,
+            "Peso Total (En KG)": entity.weight,
+            Teléfono: entity.phone,
+            Cargo: entity.position,
+            Ciudad: entity.city,
+            Barrio: entity.neighborhood,
+            Comuna: entity.commune,
+            Dirección: entity.address,
+            "Punto de acopio": entity.acopio,
+            "Cual punto de acopio:": entity.acopioName,
+            "Comité ambiental": entity.committee,
+            "Cuenta con PRAE": entity.prae,
+            "Nombre PRAE": entity.praeName,
+            "Cuenta con PROCEDA": entity.proceda,
+            "Nombre PROCEDA": entity.procedaProject
+          }))
+        );
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Entidades");
+        XLSX.writeFile(workbook, "datos_reciclaje.xlsx");
+        message.success("Archivo descargado correctamente");
+        setIsDownloadModalVisible(false);
+        setDownloadTokenInput("");
+      }
     } catch (error: any) {
       const errorMessage = error.graphQLErrors?.[0]?.message || "Error al validar el token";
       message.error(errorMessage);
@@ -228,96 +302,124 @@ const Reciclaje = () => {
     },
   ];
 
-  return (<Layout>
-    <>
-
-      <main className="bg-[url(/images/bg.png)] bg-cover flex flex-col items-center p-4">
-        {/* Modal para agregar/restar kilos */}
-        {showFormSum && (
-          <section
-            className="fixed left-0 top-0 w-screen h-screen bg-black/50 z-20 flex justify-center items-center"
-            onClick={() => setShowFormSum(false)}
-          >
+  return (
+    <Layout>
+      <>
+        <main className="bg-[url(/images/bg.png)] bg-cover flex flex-col items-center p-4">
+          {showFormSum && (
             <section
-              className="px-6 w-[90%] md:w-96 h-80 rounded-3xl bg-white flex flex-col justify-center items-center relative"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed left-0 top-0 w-screen h-screen bg-black/50 z-20 flex justify-center items-center"
+              onClick={() => setShowFormSum(false)}
             >
-              <button
-                onClick={() => setShowFormSum(false)}
-                className="absolute top-3 right-4 text-gray-500 hover:text-gray-700"
+              <section
+                className="px-6 w-[90%] md:w-96 h-80 rounded-3xl bg-white flex flex-col justify-center items-center relative"
+                onClick={(e) => e.stopPropagation()}
               >
-                X
-              </button>
-              <h2 className="text-xl font-bold text-black/50 pt-10">
-                {isTokenSent ? "Confirmar token" : "Agregar o restar kilos"}
-              </h2>
-              <section className="w-full m-auto flex flex-col gap-3 items-center justify-center">
-                {!isTokenSent ? (
-                  <>
-                    <InputNumber
-                      value={weightUpdate}
-                      onChange={(value) => value !== null && setWeightUpdate(value)}
-                      addonAfter={<>KL</>}
-                      style={{ width: "50%" }}
+                <button
+                  onClick={() => setShowFormSum(false)}
+                  className="absolute top-3 right-4 text-gray-500 hover:text-gray-700"
+                >
+                  X
+                </button>
+                <h2 className="text-xl font-bold text-black/50 pt-10">
+                  {isTokenSent ? "Confirmar token" : "Agregar o restar kilos"}
+                </h2>
+                <section className="w-full m-auto flex flex-col gap-3 items-center justify-center">
+                  {!isTokenSent ? (
+                    <>
+                      <InputNumber
+                        value={weightUpdate}
+                        onChange={(value) => value !== null && setWeightUpdate(value)}
+                        addonAfter={<>KL</>}
+                        style={{ width: "50%" }}
+                      />
+                      <span className="text-lg font-semibold text-black/80">
+                        Total: {formUpdate.currentWeight + weightUpdate} KL
+                      </span>
+                    </>
+                  ) : (
+                    <Input
+                      value={tokenInput}
+                      onChange={(e) => setTokenInput(e.target.value)}
+                      placeholder="Ingrese el token para guardar cambios"
+                      style={{ width: "80%" }}
                     />
-                    <span className="text-lg font-semibold text-black/80">
-                      Total: {formUpdate.currentWeight + weightUpdate} KL
-                    </span>
-                  </>
-                ) : (
-                  <Input
-                    value={tokenInput}
-                    onChange={(e) => setTokenInput(e.target.value)}
-                    placeholder="Ingrese el token para guardar cambios"
-                    style={{ width: "80%" }}
-                  />
-                )}
+                  )}
+                </section>
+                <div className="flex gap-3">
+                  {!isTokenSent ? (
+                    <Button
+                      onClick={handleAddRecycling}
+                      loading={loadingToken}
+                      className="bg-green-500 px-5 py-5 mb-4 text-white rounded-xl"
+                    >
+                      Aplicar
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleConfirmToken}
+                      loading={loadingConfirm}
+                      className="bg-blue-500 px-5 py-5 mb-4 text-white rounded-xl"
+                    >
+                      Confirmar
+                    </Button>
+                  )}
+                </div>
               </section>
-              <div className="flex gap-3}">
-                {!isTokenSent ? (
-                  <Button
-                    onClick={handleAddRecycling}
-                    loading={loadingToken}
-                    className="bg-green-500 px-5 py-5 mb-4 text-white rounded-xl"
-                  >
-                    Aplicar
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleConfirmToken}
-                    loading={loadingConfirm}
-                    className="bg-blue-500 px-5 py-5 mb-4 text-white rounded-xl"
-                  >
-                    Confirmar
-                  </Button>
-                )}
-              </div>
             </section>
-          </section>
-        )}
+          )}
 
-        <div className="flex flex-col w-full mt-20">
+          <div className="flex flex-col w-full mt-20">
+            <section className="w-11/12 mx-auto my-4">
+              {loadingEntities ? (
+                <div className="min-h-[300px] flex justify-center items-center">
+                  <Loading text="Cargando datos..." type="bars" />
+                </div>
+              ) : (
+                <Table<DataType>
+                  columns={columns}
+                  dataSource={entities}
+                  scroll={{ x: "max-content" }}
+                />
+              )}
+            </section>
+            <div className="w-11/12 mx-auto flex justify-start mt-4">
+              <Button
+                onClick={handleGenerateDownloadTokenClick}
+                loading={loadingDownloadToken}
+                className="flex items-center gap-2"
+              >
+                <FileEarmarkArrowDown size={25} />
+              </Button>
+            </div>
+          </div>
 
-          <section className="w-11/12 mx-auto my-4">
-            {loadingEntities ? (
-              <div className="min-h-[300px] flex justify-center items-center">
-                <Loading text="Cargando datos..." type="bars" />
-              </div>
-            ) : (
-              <Table<DataType>
-                columns={columns}
-                dataSource={entities}
-                scroll={{ x: 'max-content' }}
-              />
-            )}
-          </section>
-        </div>
-      </main>
-
-    </>
-  </Layout>
+          <Modal
+            title="Confirmar Descarga"
+            open={isDownloadModalVisible}
+            onCancel={() => setIsDownloadModalVisible(false)}
+            footer={null}
+          >
+            <p>Se ha enviado un token al correo del administrador. Por favor, ingrésalo para confirmar la descarga.</p>
+            <Input
+              value={downloadTokenInput}
+              onChange={(e) => setDownloadTokenInput(e.target.value)}
+              placeholder="Ingrese el token"
+              style={{ marginBottom: 16 }}
+            />
+            <Button
+              type="primary"
+              onClick={handleConfirmDownloadToken}
+              loading={loadingConfirmDownload}
+              block
+            >
+              Confirmar
+            </Button>
+          </Modal>
+        </main>
+      </>
+    </Layout>
   );
-
 };
 
 export default Reciclaje;

@@ -96,3 +96,17 @@ export const FETCH_MUTATION_CONFIRM_DELETE_TOKEN = gql`
     confirmDeleteToken(token: $token)
   }
 `;
+
+export const FETCH_MUTATION_GENERATE_DOWNLOAD_TOKEN = gql`
+  mutation GenerateDownloadToken {
+    generateDownloadToken {
+      message
+    }
+  }
+`;
+
+export const FETCH_MUTATION_CONFIRM_DOWNLOAD_TOKEN = gql`
+  mutation ConfirmDownloadToken($token: String!) {
+    confirmDownloadToken(token: $token)
+  }
+`;

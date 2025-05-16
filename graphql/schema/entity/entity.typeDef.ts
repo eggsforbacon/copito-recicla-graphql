@@ -78,6 +78,19 @@ export const EntityTypeDefs = gql`
     city: String!
     weight: Float!
     category: CATEGORY!
+    email: String!
+    neighborhood: String
+    position: String
+    address: String
+    acopio: Boolean
+    acopioName: String
+    prae: Boolean
+    praeName: String
+    proceda: Boolean
+    procedaProject: String
+    committee: Boolean
+    commune: Int!
+    phone: String
   }
 
   type Query {
@@ -92,7 +105,9 @@ export const EntityTypeDefs = gql`
     generateEntityUpdateToken(input: EntityInputUpdate!): TokenResponse!
     confirmEntityUpdateToken(token: String!): Entity!
     generateDeleteToken(id: Int!): TokenResponse!
-   confirmDeleteToken(token: String!): Boolean!
+    confirmDeleteToken(token: String!): Boolean!
+    generateDownloadToken: TokenResponse!
+    confirmDownloadToken(token: String!): Boolean!
   }
 
   enum CATEGORY {

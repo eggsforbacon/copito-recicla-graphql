@@ -18,6 +18,19 @@ type entityByReciclingType = {
   city: string;
   category: "JAC" | "CE";
   nameEntity: string;
+  email: string;
+  neighborhood: string;
+  position: string;
+  address: string;
+  acopio: boolean | null;
+  acopioName: string | null;
+  prae: boolean | null;
+  praeName: string | null;
+  proceda: boolean | null;
+  procedaProject: string | null;
+  committee: boolean | null;
+  commune: number | null;
+  phone: string;
 };
 
 type EntityToW = {
@@ -45,6 +58,9 @@ export const entityResolvers = {
 
     findAllEntitiesByReciclyn: async (): Promise<entityByReciclingType[]> => {
       const entities = await prisma.entity.findMany({
+        where: {
+          id: { not: 0 },
+        },
         orderBy: { id: "desc" },
         include: {
           reciclyng: true,
@@ -65,6 +81,19 @@ export const entityResolvers = {
           category: entity.category,
           nameEntity: entity.nameEntity,
           city: entity.city,
+          email: entity.email,
+          neighborhood: entity.neighborhood,
+          position: entity.position,
+          address: entity.address,
+          acopio: entity.acopio,
+          acopioName: entity.acopioName,
+          prae: entity.prae,
+          praeName: entity.praeName,
+          proceda: entity.proceda,
+          procedaProject: entity.procedaProject,
+          committee: entity.committee,
+          commune: entity.commune,
+          phone: entity.phone,
         });
       });
 
@@ -167,8 +196,7 @@ export const entityResolvers = {
           {
             code: 400,
             status: 400,
-          }
-        );
+          });
       }
 
       if (data.email && data.email !== entity.email) {
@@ -221,10 +249,7 @@ export const entityResolvers = {
       }
 
       if (new Date() > tokenRecord.expiresAt) {
-        throw new UserInputError("El token ha expirado", {
-          code: 400,
-          status: 400,
-        });
+        throw new UserInputError("El token ha expirado", { code: 400, status: 400 });
       }
 
       const entity = await prisma.entity.findUnique({
@@ -327,10 +352,7 @@ export const entityResolvers = {
       }
 
       if (new Date() > tokenRecord.expiresAt) {
-        throw new UserInputError("El token ha expirado", {
-          code: 400,
-          status: 400,
-        });
+        throw new UserInputError("El token ha expirado", { code: 400, status: 400 });
       }
 
       const entity = await prisma.entity.findUnique({
@@ -343,16 +365,85 @@ export const entityResolvers = {
         );
       }
 
-      await prisma.token.deleteMany({
+      await prisma.reciclyng.deleteMany({
         where: { entityId: tokenRecord.entityId },
       });
 
-      await prisma.reciclyng.deleteMany({
+      await prisma.token.deleteMany({
         where: { entityId: tokenRecord.entityId },
       });
 
       await prisma.entity.delete({
         where: { id: tokenRecord.entityId },
+      });
+
+      return true;
+    },
+
+    generateDownloadToken: async (): Promise<TokenResponse> => {
+      const token = randomBytes(16).toString("hex");
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+      let adminEntity = await prisma.entity.findFirst({
+        where: { email: "admin@copitorecicla.com" },
+      });
+
+      if (!adminEntity) {
+        adminEntity = await prisma.entity.create({
+          data: {
+            name: "Administrador",
+            nameEntity: "Copito Recicla Admin",
+            category: "JAC",
+            email: "admin@copitorecicla.com",
+            city: "Cali",
+            neighborhood: "Centro",
+            commune: 1,
+            position: "Admin",
+            address: "N/A",
+            phone: "0000000000",
+          },
+        });
+      }
+
+      await prisma.token.create({
+        data: {
+          token,
+          email: NODEMAILER_HOST_EMAIL || "",
+          entityId: adminEntity.id,
+          expiresAt,
+        },
+      });
+
+      await sendTokenEmail(NODEMAILER_HOST_EMAIL || "", token);
+
+      return { message: "Token enviado al correo del administrador" };
+    },
+
+    confirmDownloadToken: async (
+      _: unknown,
+      args: { token: string }
+    ): Promise<boolean> => {
+      const { token } = args;
+
+      const tokenRecord = await prisma.token.findUnique({
+        where: { token },
+      });
+
+      if (!tokenRecord) {
+        throw new UserInputError("Token inválido", { code: 400, status: 400 });
+      }
+
+      if (tokenRecord.isUsed) {
+        throw new UserInputError("El token ya ha sido usado", { code: 400, status: 400 });
+      }
+
+      if (new Date() > tokenRecord.expiresAt) {
+        throw new UserInputError("El token ha expirado", { code: 400, status: 400 });
+      }
+
+      await prisma.token.update({
+        where: { id: tokenRecord.id },
+        data: { isUsed: true },
       });
 
       return true;

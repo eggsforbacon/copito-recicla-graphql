@@ -47,6 +47,18 @@ export const FETCH_ENTITIES_BY_RECICLING = gql`
       city
       id
       category
+      email
+      neighborhood
+      position
+      address
+      acopio
+      prae
+      praeName
+      proceda
+      procedaProject
+      committee
+      commune
+      phone
     }
   }
 `;
