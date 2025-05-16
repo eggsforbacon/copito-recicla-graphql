@@ -347,6 +347,10 @@ export const entityResolvers = {
         where: { entityId: tokenRecord.entityId },
       });
 
+      await prisma.reciclyng.deleteMany({
+        where: { entityId: tokenRecord.entityId },
+      });
+
       await prisma.entity.delete({
         where: { id: tokenRecord.entityId },
       });

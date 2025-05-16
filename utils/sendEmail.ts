@@ -154,7 +154,7 @@ export const sendDeleteTokenEmail = async (token: string, entityId: number) => {
   const mailOptions = {
     from: process.env.NODEMAILER_HOST_EMAIL,
     to,
-    subject: "Token de confirmación - Copito Recicla (Eliminación)",
+    subject: "Token de confirmación (Eliminación) - Copito Recicla",
     html,
   };
 
