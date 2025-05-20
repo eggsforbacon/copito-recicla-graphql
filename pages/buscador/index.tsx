@@ -17,9 +17,12 @@ export default function Buscador() {
   const childRef = useRef<ChildRef>(null);
   const [searchText, setSearchText] = useState('');
 
-  const handleSearchClick = () => {
+// Actualizamos el onChange para buscar dinámicamente
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setSearchText(text);
     if (childRef.current) {
-      childRef.current.search(searchText);
+      childRef.current.search(text); // Llama al método search en tiempo real
     }
   };
 
@@ -31,7 +34,7 @@ export default function Buscador() {
       <>
         <main className="w-screen min-h-screen bg-[url(/images/bg.png)] bg-no-repeat bg-cover text-black bg-bottom px-4 relative pt-[150px] lg:pt-[250px]">
           {/* Logos posicionados de forma absoluta (no afectan flujo del contenido) */}
-          <div className="absolute top-24 left-36 z-10 hidden lg:block">
+          <div className="absolute top-28 left-36 z-10 hidden lg:block">
             <Image
               src="/images/logo-gov.png"
               alt="Logo Izquierdo"
@@ -70,25 +73,21 @@ export default function Buscador() {
               />
             </div>
 
-            <h2 className="text-xl xl:text-3xl font-bold text-center w-full">
+           <h2 className="text-xl xl:text-3xl pt-10 font-bold text-center w-full">
               ¡Consulta cuánto llevas!
             </h2>
 
             <input
-            onChange={(e) => setSearchText(e.target.value)}
-            className="border-b-2 px-4 py-4 text-xl text-center bg-[#B6E6E2] w-full rounded-full"
-            placeholder="Municipio - Nombre - Entidad"
-          />
+              onChange={handleSearchChange} // Actualizamos a la nueva función
+              value={searchText} // Añadimos value para control del input
+              className="border-b-2 px-4 py-4 text-xl text-center bg-[#B6E6E2] w-full rounded-full"
+              placeholder="Municipio - Nombre - Entidad"
+            />
 
-          <button
-            onClick={handleSearchClick}
-            className="border-4 border-white/50 px-10 py-3 font-bold text-white rounded-full bg-[#243A48] self-center"
-          >
-            Buscar
-          </button>
+            {/* Eliminamos el botón */}
           </section>
 
-          <section className="w-full  px-10 mt-10 lg:mt-16">
+          <section className="w-full  px-10 mt-10 lg:mt-20">
             <TableData ref={childRef} />
           </section>
         </main>

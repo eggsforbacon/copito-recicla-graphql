@@ -56,8 +56,8 @@ export default function Noticia() {
 
   return (
     <Layout>
-      <main className="w-screen min-h-screen bg-[url(/images/bg.png)] bg-no-repeat bg-cover bg-bottom">
-        <section className="min-h-screen flex items-center justify-center lg:pt-24 px-4 text-center relative">
+      <main className="w-screen  min-h-screen bg-[url(/images/bg.png)] bg-no-repeat bg-cover bg-bottom">
+        <section className="min-h-screen flex items-center justify-center pt-20 lg:pt-24 px-4 text-center relative">
           <div className="max-w-4xl w-full p-2 bg-transparent">
             <div className="lg:hidden w-full flex justify-center">
               <Image

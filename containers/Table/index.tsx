@@ -33,12 +33,17 @@ const TableData = forwardRef((props, ref) => {
   }, [entities, loadingEntities]);
 
   const search = (text: string) => {
+    setSearchText(text);
     if(text !== '') {
-      setData(entities.filter((item: DataType) => item.name.toString().toLowerCase().includes(text.toLowerCase())));
-    }else {
-      setData(entities)
+      setData(entities.filter((item: DataType) => 
+        item.city.toLowerCase().includes(text.toLowerCase()) ||
+        item.name.toLowerCase().includes(text.toLowerCase()) ||
+        item.nameEntity.toLowerCase().includes(text.toLowerCase())
+      ));
+    } else {
+      setData(entities);
     }
-  }
+  };
 
   useImperativeHandle(ref, () => ({
     search: search,

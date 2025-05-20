@@ -86,7 +86,7 @@ const Header = () => {
 
         {/* Menú Desplegable para móviles */}
         {isMenuOpen && (
-          <div className="absolute top-2 left-20 bg-transparent shadow-none rounded-lg py-2 px-4 lg:hidden z-50 flex flex-col gap-2">
+          <div className="absolute top-20 left-4 bg-[#243A48] shadow-none rounded-lg py-4 px-4 lg:hidden z-50 flex flex-col gap-2">
             {dropdownLinks.map((link, index) => {
               const bgColors = ['bg-[#4EB7AF]', 'bg-[#4EB7AF]', 'bg-[#4EB7AF]'];
               return isBuscador ? (
