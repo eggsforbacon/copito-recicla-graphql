@@ -462,8 +462,7 @@ export const entityResolvers = {
 
       if (tokenRecord.isUsed) {
         throw new UserInputError("El token ya ha sido usado", {
-          code: 400,
-          status: 400,
+          code: 400, status: 400,
         });
       }
 
@@ -531,7 +530,12 @@ export const entityResolvers = {
         });
       }
 
-      const updateData = JSON.parse(updateRequest.updateData || "{}");
+      const updateDataString = updateRequest.updateData
+        ? typeof updateRequest.updateData === 'string'
+          ? updateRequest.updateData
+          : JSON.stringify(updateRequest.updateData)
+        : '{}';
+      const updateData = JSON.parse(updateDataString);
 
       const currentEntity = await prisma.entity.findUnique({
         where: { id: updateRequest.entityId },
