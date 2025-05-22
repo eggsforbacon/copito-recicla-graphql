@@ -10,6 +10,43 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const fieldNameMapping: { [key: string]: string } = {
+  name: "Nombre",
+  nameEntity: "Nombre de la entidad",
+  category: "Categoría",
+  email: "Correo electrónico",
+  city: "Ciudad",
+  neighborhood: "Barrio",
+  commune: "Comuna",
+  position: "Cargo",
+  address: "Dirección",
+  phone: "Teléfono",
+  acopio: "Punto de acopio",
+  acopioName: "Nombre del punto de acopio",
+  prae: "PRAE",
+  praeName: "Nombre del PRAE",
+  proceda: "PROCEDA",
+  procedaProject: "Proyecto PROCEDA",
+  committee: "Comité ambiental",
+  attachment: "Adjunto",
+};
+
+const getChangedFields = (currentData: any, updateData: any): { field: string; oldValue: any; newValue: any }[] => {
+  const changedFields: { field: string; oldValue: any; newValue: any }[] = [];
+  for (const [key, newValue] of Object.entries(updateData)) {
+    if (key === 'id') continue;
+    const oldValue = currentData[key];
+    if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+      changedFields.push({
+        field: key,
+        oldValue: oldValue !== undefined ? oldValue : "No definido",
+        newValue,
+      });
+    }
+  }
+  return changedFields;
+};
+
 export const sendTokenEmail = async (to: string, token: string) => {
   const html = `
   <!DOCTYPE html>
@@ -165,6 +202,161 @@ export const sendDeleteTokenEmail = async (token: string, entityId: number) => {
   }
 };
 
+export const sendAdminUpdateNotificationEmail = async (data: {
+  entityName: string;
+  currentData: any;
+  updateData: string;
+  requestId: number;
+}) => {
+  const { entityName, currentData, updateData, requestId } = data;
+  const updateFields = JSON.parse(updateData);
+  
+  const changedFields = getChangedFields(currentData, updateFields);
+
+  if (changedFields.length === 0) {
+    return;
+  }
+
+  const changesHtml = changedFields
+    .map(({ field, oldValue, newValue }) => {
+      const fieldName = fieldNameMapping[field] || field;
+      return `<li><strong>${fieldName}</strong>: De "${oldValue}" a "${newValue}"</li>`;
+    })
+    .join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Solicitud de actualización</title>
+    </head>
+    <body style="margin:0; padding:0; background:#f4f4f5;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+              <tr>
+                <td style="padding: 40px;">
+                  <h2 style="margin:0 0 20px; color:#333333;">Solicitud de actualización de entidad</h2>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    La entidad <strong>${entityName}</strong> ha solicitado actualizar su información.
+                  </p>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    <strong>Cambios propuestos:</strong>
+                  </p>
+                  <ul style="margin:0 0 30px; padding-left:20px; color:#555555; line-height:1.5;">
+                    ${changesHtml}
+                  </ul>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    Para aprobar esta solicitud, haz clic en el siguiente enlace:
+                  </p>
+                  <a href="https://copitorecicla.com/api/approve-entity-update?requestId=${requestId}" 
+                     style="display:inline-block; padding:10px 20px; background:#007bff; color:#ffffff; text-decoration:none; border-radius:4px;">
+                    Aprobar solicitud
+                  </a>
+                  <p style="margin:40px 0 0; color:#777777; font-size:14px;">
+                    Si no deseas aprobar estos cambios, puedes ignorar este correo.
+                  </p>
+                  <p style="margin:20px 0 0; color:#333333;">
+                    Gracias,<br/>
+                    <strong>Copito Recicla</strong>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:20px 0; font-size:12px; color:#aaaaaa;">
+            Copito Recicla – © ${new Date().getFullYear()}
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: NODEMAILER_HOST_EMAIL,
+    to: NODEMAILER_HOST_EMAIL,
+    subject: `Solicitud de actualización de entidad - ${entityName}`,
+    html,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+export const sendEntityUpdateApprovalEmail = async (data: {
+  entityEmail: string;
+  entityName: string;
+  updatedFields: string[];
+}) => {
+  const { entityEmail, entityName, updatedFields } = data;
+
+  const updatedFieldsHtml = updatedFields
+    .map(field => `<li>${fieldNameMapping[field] || field}</li>`)
+    .join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Aprobación de actualización</title>
+    </head>
+    <body style="margin:0; padding:0; background:#f4f4f5;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+              <tr>
+                <td style="padding: 40px;">
+                  <h2 style="margin:0 0 20px; color:#333333;">Aprobación de actualización</h2>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    Hola <strong>${entityName}</strong>,
+                  </p>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    Su solicitud para actualizar la información ha sido aprobada.
+                  </p>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    <strong>Campos actualizados:</strong>
+                  </p>
+                  <ul style="margin:0 0 30px; padding-left:20px; color:#555555; line-height:1.5;">
+                    ${updatedFieldsHtml}
+                  </ul>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    Gracias por mantener su información actualizada.
+                  </p>
+                  <p style="margin:20px 0 0; color:#333333;">
+                    Gracias,<br/>
+                    <strong>Copito Recicla</strong>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:20px 0; font-size:12px; color:#aaaaaa;">
+            Copito Recicla – © ${new Date().getFullYear()}
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: NODEMAILER_HOST_EMAIL,
+    to: entityEmail,
+    subject: "Solicitud de actualización de información aprobada",
+    html,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 export const sendAdminNotificationEmail = async (data: {
   entityName: string;
   requestedWeight: number;
@@ -174,18 +366,67 @@ export const sendAdminNotificationEmail = async (data: {
   const { entityName, requestedWeight, currentWeight, requestId } = data;
   const newTotal = currentWeight + requestedWeight;
 
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Solicitud de actualización de peso</title>
+    </head>
+    <body style="margin:0; padding:0; background:#f4f4f5;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+              <tr>
+                <td style="padding: 40px;">
+                  <h2 style="margin:0 0 20px; color:#333333;">Solicitud de actualización de peso</h2>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    La entidad <strong>${entityName}</strong> ha solicitado actualizar su pesaje de reciclaje.
+                  </p>
+                  <p style="margin:0 0 10px; color:#555555; line-height:1.5;">
+                    <strong>Peso solicitado:</strong> ${requestedWeight} KG
+                  </p>
+                  <p style="margin:0 0 10px; color:#555555; line-height:1.5;">
+                    <strong>Peso actual:</strong> ${currentWeight} KG
+                  </p>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    <strong>Nuevo total si se aprueba:</strong> ${newTotal} KG
+                  </p>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    Para aprobar esta solicitud, haz clic en el siguiente enlace:
+                  </p>
+                  <a href="https://copitorecicla.com/api/approve-request?requestId=${requestId}" 
+                     style="display:inline-block; padding:10px 20px; background:#007bff; color:#ffffff; text-decoration:none; border-radius:4px;">
+                    Aprobar solicitud
+                  </a>
+                  <p style="margin:40px 0 0; color:#777777; font-size:14px;">
+                    Si no deseas aprobar esta solicitud, puedes ignorar este correo.
+                  </p>
+                  <p style="margin:20px 0 0; color:#333333;">
+                    Gracias,<br/>
+                    <strong>Copito Recicla</strong>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:20px 0; font-size:12px; color:#aaaaaa;">
+            Copito Recicla – © ${new Date().getFullYear()}
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
   const mailOptions = {
-    from: process.env.NODEMAILER_HOST_EMAIL,
-    to: process.env.NODEMAILER_HOST_EMAIL,
+    from: NODEMAILER_HOST_EMAIL,
+    to: NODEMAILER_HOST_EMAIL,
     subject: `Solicitud de actualización de peso - ${entityName}`,
-    html: `
-      <p>La entidad <strong>${entityName}</strong> ha solicitado actualizar su pesaje de reciclaje.</p>
-      <p><strong>Peso solicitado:</strong> ${requestedWeight} KG</p>
-      <p><strong>Peso actual:</strong> ${currentWeight} KG</p>
-      <p><strong>Nuevo total si se aprueba:</strong> ${newTotal} KG</p>
-      <p>Para aprobar esta solicitud, haz clic en el siguiente enlace:</p>
-      <a href="https://copitorecicla.com/api/approve-request?requestId=${requestId}">Aprobar solicitud</a>
-    `,
+    html,
   };
 
   await transporter.sendMail(mailOptions);
@@ -198,16 +439,57 @@ export const sendApprovalEmail = async (data: {
 }) => {
   const { entityEmail, entityName, approvedWeight } = data;
 
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Aprobación de actualización de peso</title>
+    </head>
+    <body style="margin:0; padding:0; background:#f4f4f5;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+              <tr>
+                <td style="padding: 40px;">
+                  <h2 style="margin:0 0 20px; color:#333333;">Aprobación de actualización de peso</h2>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    Hola <strong>${entityName}</strong>,
+                  </p>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    Su solicitud para actualizar el pesaje de reciclaje ha sido aprobada.
+                  </p>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    <strong>Peso aprobado:</strong> ${approvedWeight} KG
+                  </p>
+                  <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
+                    Gracias por su contribución al reciclaje.
+                  </p>
+                  <p style="margin:20px 0 0; color:#333333;">
+                    Gracias,<br/>
+                    <strong>Copito Recicla</strong>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:20px 0; font-size:12px; color:#aaaaaa;">
+            Copito Recicla – © ${new Date().getFullYear()}
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
   const mailOptions = {
-    from: process.env.NODEMAILER_HOST_EMAIL,
+    from: NODEMAILER_HOST_EMAIL,
     to: entityEmail,
     subject: "Solicitud de actualización de peso aprobada",
-    html: `
-      <p>Hola <strong>${entityName}</strong>,</p>
-      <p>Su solicitud para actualizar el pesaje de reciclaje ha sido aprobada.</p>
-      <p><strong>Peso aprobado:</strong> ${approvedWeight} KG</p>
-      <p>Gracias por su contribución al reciclaje.</p>
-    `,
+    html,
   };
 
   await transporter.sendMail(mailOptions);

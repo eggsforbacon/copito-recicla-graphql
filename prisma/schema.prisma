@@ -73,7 +73,8 @@ model UpdateRequest {
   id              Int      @id @default(autoincrement())
   entityId        Int
   entity          Entity   @relation(fields: [entityId], references: [id])
-  requestedWeight Float
+  requestedWeight Float?
+  updateData      Json?
   status          String   @default("pending")
   createdAt       DateTime @default(now())
 }

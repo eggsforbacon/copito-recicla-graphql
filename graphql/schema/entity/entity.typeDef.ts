@@ -93,6 +93,20 @@ export const EntityTypeDefs = gql`
     phone: String
   }
 
+  type UpdateRequest {
+    id: ID!
+    entityId: Int!
+    requestedWeight: Float
+    updateData: String
+    status: String!
+    createdAt: String!
+  }
+
+  input EntityUpdateRequestInput {
+    entityId: Int!
+    updateData: String!
+  }
+
   type Query {
     findAllEntities: [Entity!]!
     findEntity(id: Int!): Entity
@@ -108,6 +122,8 @@ export const EntityTypeDefs = gql`
     confirmDeleteToken(token: String!): Boolean!
     generateDownloadToken: TokenResponse!
     confirmDownloadToken(token: String!): Boolean!
+    createEntityUpdateRequest(input: EntityUpdateRequestInput!): UpdateRequest!
+    approveEntityUpdateRequest(requestId: Int!): Entity!
   }
 
   enum CATEGORY {

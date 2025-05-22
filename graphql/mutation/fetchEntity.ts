@@ -110,3 +110,15 @@ export const FETCH_MUTATION_CONFIRM_DOWNLOAD_TOKEN = gql`
     confirmDownloadToken(token: $token)
   }
 `;
+
+export const CREATE_ENTITY_UPDATE_REQUEST = gql`
+  mutation CreateEntityUpdateRequest($input: EntityUpdateRequestInput!) {
+    createEntityUpdateRequest(input: $input) {
+      id
+      entityId
+      updateData
+      status
+      createdAt
+    }
+  }
+`;

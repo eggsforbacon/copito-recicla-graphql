@@ -1,7 +1,7 @@
 import { UserInputError } from "apollo-server-micro";
 import prisma from "@/prisma";
 import { EntityType, EntityTypeUp, EntityUpdateData } from "@/types/entity";
-import { sendTokenEmail } from "@/utils/sendEmail";
+import { sendTokenEmail, sendAdminUpdateNotificationEmail, sendEntityUpdateApprovalEmail } from "@/utils/sendEmail";
 import { randomBytes } from "crypto";
 import { sendDeleteTokenEmail } from "@/utils/sendEmail";
 
@@ -49,6 +49,29 @@ type EntityToW = {
 
 type TokenResponse = {
   message: string;
+};
+
+type EntityUpdateRequestInput = {
+  input: {
+    entityId: number;
+    updateData: string;
+  };
+};
+
+type ApproveEntityUpdateRequestInput = {
+  requestId: number;
+};
+
+const getChangedFields = (currentData: any, updateData: any): string[] => {
+  const changedFields: string[] = [];
+  for (const [key, newValue] of Object.entries(updateData)) {
+    if (key === 'id') continue;
+    const oldValue = currentData[key];
+    if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+      changedFields.push(key);
+    }
+  }
+  return changedFields;
 };
 
 export const entityResolvers = {
@@ -373,6 +396,10 @@ export const entityResolvers = {
         where: { entityId: tokenRecord.entityId },
       });
 
+      await prisma.updateRequest.deleteMany({
+        where: { entityId: tokenRecord.entityId },
+      });
+
       await prisma.entity.delete({
         where: { id: tokenRecord.entityId },
       });
@@ -434,7 +461,10 @@ export const entityResolvers = {
       }
 
       if (tokenRecord.isUsed) {
-        throw new UserInputError("El token ya ha sido usado", { code: 400, status: 400 });
+        throw new UserInputError("El token ya ha sido usado", {
+          code: 400,
+          status: 400,
+        });
       }
 
       if (new Date() > tokenRecord.expiresAt) {
@@ -447,6 +477,94 @@ export const entityResolvers = {
       });
 
       return true;
+    },
+
+    createEntityUpdateRequest: async (_: unknown, args: EntityUpdateRequestInput): Promise<any> => {
+      const { entityId, updateData } = args.input;
+
+      const entity = await prisma.entity.findUnique({
+        where: { id: entityId },
+      });
+      if (!entity) {
+        throw new UserInputError(`No se encontró una entidad con ID ${entityId}`, {
+          code: 404,
+          status: 404,
+        });
+      }
+
+      const updateRequest = await prisma.updateRequest.create({
+        data: {
+          entityId,
+          updateData,
+          status: "pending",
+        },
+      });
+
+      await sendAdminUpdateNotificationEmail({
+        entityName: entity.name,
+        currentData: entity,
+        updateData,
+        requestId: updateRequest.id,
+      });
+
+      return updateRequest;
+    },
+
+    approveEntityUpdateRequest: async (_: unknown, args: ApproveEntityUpdateRequestInput): Promise<any> => {
+      const { requestId } = args;
+
+      const updateRequest = await prisma.updateRequest.findUnique({
+        where: { id: requestId },
+      });
+
+      if (!updateRequest) {
+        throw new UserInputError(`No se encontró la solicitud con ID ${requestId}`, {
+          code: 404,
+          status: 404,
+        });
+      }
+
+      if (updateRequest.status !== "pending") {
+        throw new UserInputError("La solicitud ya ha sido procesada", {
+          code: 400,
+          status: 400,
+        });
+      }
+
+      const updateData = JSON.parse(updateRequest.updateData || "{}");
+
+      const currentEntity = await prisma.entity.findUnique({
+        where: { id: updateRequest.entityId },
+      });
+
+      if (!currentEntity) {
+        throw new UserInputError(`No se encontró una entidad con ID ${updateRequest.entityId}`, {
+          code: 404,
+          status: 404,
+        });
+      }
+
+      const changedFields = getChangedFields(currentEntity, updateData);
+
+      const updatedEntity = await prisma.entity.update({
+        where: { id: updateRequest.entityId },
+        data: updateData,
+      });
+
+      await prisma.updateRequest.update({
+        where: { id: requestId },
+        data: { status: "approved" },
+      });
+
+      if (changedFields.length > 0) {
+        await sendEntityUpdateApprovalEmail({
+          entityEmail: updatedEntity.email,
+          entityName: updatedEntity.name,
+          updatedFields: changedFields,
+        });
+      }
+
+      return updatedEntity;
     },
   },
 };

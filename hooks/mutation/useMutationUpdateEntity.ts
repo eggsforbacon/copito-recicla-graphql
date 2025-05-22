@@ -7,6 +7,19 @@ import {
   FETCH_MUTATION_GENERATE_DELETE_TOKEN,
   FETCH_MUTATION_CONFIRM_DELETE_TOKEN,
 } from "@/graphql/mutation/fetchEntity";
+import { gql } from "@apollo/client";
+
+export const CREATE_ENTITY_UPDATE_REQUEST = gql`
+  mutation CreateEntityUpdateRequest($input: EntityUpdateRequestInput!) {
+    createEntityUpdateRequest(input: $input) {
+      id
+      entityId
+      updateData
+      status
+      createdAt
+    }
+  }
+`;
 
 export const useMutationUpdateEntity = () => {
   const [updateEntity, { loading: loadingUpdate }] = useMutation(FETCH_MUTATION_UPDATE_ENTITY);
@@ -14,6 +27,7 @@ export const useMutationUpdateEntity = () => {
   const [confirmToken, { loading: loadingConfirm }] = useMutation(FETCH_MUTATION_CONFIRM_ENTITY_TOKEN);
   const [generateDeleteToken, { loading: loadingDeleteToken }] = useMutation(FETCH_MUTATION_GENERATE_DELETE_TOKEN);
   const [confirmDeleteToken, { loading: loadingDeleteConfirm }] = useMutation(FETCH_MUTATION_CONFIRM_DELETE_TOKEN);
+  const [createEntityUpdateRequest, { loading: loadingCreateRequest }] = useMutation(CREATE_ENTITY_UPDATE_REQUEST);
 
   const useHandleUpdateEntity = async (data: EntityType) => {
     if (!data.id) {
@@ -74,6 +88,17 @@ export const useMutationUpdateEntity = () => {
     });
   };
 
+  const useHandleCreateEntityUpdateRequest = async (data: { entityId: number; updateData: string }) => {
+    return await createEntityUpdateRequest({
+      variables: {
+        input: {
+          entityId: data.entityId,
+          updateData: data.updateData,
+        },
+      },
+    });
+  };
+
   return {
     useHandleUpdateEntity,
     useHandleGenerateEntityToken,
@@ -85,5 +110,7 @@ export const useMutationUpdateEntity = () => {
     useHandleConfirmDeleteToken,
     loadingDeleteToken,
     loadingDeleteConfirm,
+    useHandleCreateEntityUpdateRequest,
+    loadingCreateRequest,
   };
 };
