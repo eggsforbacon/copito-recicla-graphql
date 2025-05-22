@@ -30,7 +30,7 @@ interface DataType {
   position: string;
   address: string;
   acopio: boolean;
-  acopioName: string,
+  acopioName: string;
   prae: boolean;
   praeName: string;
   proceda: boolean;
@@ -54,7 +54,7 @@ const Reciclaje = () => {
   const [downloadTokenInput, setDownloadTokenInput] = useState("");
 
   const { entities, loading: loadingEntities, refetch } = useQueryEntityByRecicling();
-  const { HandleGenerateToken, HandleConfirmToken, loadingToken, loadingConfirm } = useMutationReciclyn();
+  const { HandleGenerateToken, HandleConfirmToken, HandleCreateUpdateRequest, loadingToken, loadingConfirm, loadingCreateRequest } = useMutationReciclyn();
   const { HandleGenerateDownloadToken, HandleConfirmDownloadToken, loadingToken: loadingDownloadToken, loadingConfirm: loadingConfirmDownload } = useMutationDownload();
 
   const [formUpdate, setFormUpdate] = useState({
@@ -77,14 +77,15 @@ const Reciclaje = () => {
       return;
     }
     try {
-      await HandleGenerateToken({
+      await HandleCreateUpdateRequest({
         entityId: formUpdate.id,
-        weight: weightUpdate,
+        requestedWeight: weightUpdate,
       });
-      setIsTokenSent(true);
-      message.success("Se ha enviado un token al correo registrado. Por favor, ingrésalo para confirmar cambios.");
+      message.success("Solicitud enviada al administrador para su revisión.");
+      setShowFormSum(false);
+      setWeightUpdate(0);
     } catch (error: any) {
-      const errorMessage = error.graphQLErrors?.[0]?.message || "Error al enviar el token";
+      const errorMessage = error.graphQLErrors?.[0]?.message || "Error al enviar la solicitud";
       message.error(errorMessage);
     }
   };
@@ -126,7 +127,6 @@ const Reciclaje = () => {
     try {
       const isValid = await HandleConfirmDownloadToken(downloadTokenInput);
       if (isValid) {
-        // Generar archivo Excel
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet(
           entities.map((entity: DataType) => ({
@@ -322,48 +322,27 @@ const Reciclaje = () => {
                   X
                 </button>
                 <h2 className="text-xl font-bold text-black/50 pt-10">
-                  {isTokenSent ? "Confirmar token" : "Agregar o restar kilos"}
+                  Agregar o restar kilos
                 </h2>
                 <section className="w-full m-auto flex flex-col gap-3 items-center justify-center">
-                  {!isTokenSent ? (
-                    <>
-                      <InputNumber
-                        value={weightUpdate}
-                        onChange={(value) => value !== null && setWeightUpdate(value)}
-                        addonAfter={<>KL</>}
-                        style={{ width: "50%" }}
-                      />
-                      <span className="text-lg font-semibold text-black/80">
-                        Total: {formUpdate.currentWeight + weightUpdate} KL
-                      </span>
-                    </>
-                  ) : (
-                    <Input
-                      value={tokenInput}
-                      onChange={(e) => setTokenInput(e.target.value)}
-                      placeholder="Ingrese el token para guardar cambios"
-                      style={{ width: "80%" }}
-                    />
-                  )}
+                  <InputNumber
+                    value={weightUpdate}
+                    onChange={(value) => value !== null && setWeightUpdate(value)}
+                    addonAfter={<>KL</>}
+                    style={{ width: "50%" }}
+                  />
+                  <span className="text-lg font-semibold text-black/80">
+                    Total: {formUpdate.currentWeight + weightUpdate} KL
+                  </span>
                 </section>
                 <div className="flex gap-3">
-                  {!isTokenSent ? (
-                    <Button
-                      onClick={handleAddRecycling}
-                      loading={loadingToken}
-                      className="bg-green-500 px-5 py-5 mb-4 text-white rounded-xl"
-                    >
-                      Aplicar
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleConfirmToken}
-                      loading={loadingConfirm}
-                      className="bg-blue-500 px-5 py-5 mb-4 text-white rounded-xl"
-                    >
-                      Confirmar
-                    </Button>
-                  )}
+                  <Button
+                    onClick={handleAddRecycling}
+                    loading={loadingCreateRequest}
+                    className="bg-green-500 px-5 py-5 mb-4 text-white rounded-xl"
+                  >
+                    Enviar solicitud
+                  </Button>
                 </div>
               </section>
             </section>

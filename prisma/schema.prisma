@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,28 +18,29 @@ model User {
 }
 
 model Entity {
-  id                Int   @id @default(autoincrement())
+  id                Int          @id @default(autoincrement())
   name              String
   nameEntity        String
   category          CATEGORY
-  email             String   @unique
+  email             String       @unique
   city              String
   neighborhood      String
   commune           Int
   position          String
   address           String
   phone             String
-  acopio            Boolean?  @default(false)
+  acopio            Boolean?     @default(false)
   acopioName        String?
-  prae              Boolean? @default(false)
+  prae              Boolean?     @default(false)
   praeName          String?
-  proceda           Boolean? @default(false)
+  proceda           Boolean?     @default(false)
   procedaProject    String?
-  committee         Boolean? @default(false)
+  committee         Boolean?     @default(false)
   attachment        String?
   reciclyng         Reciclyng[]
-  tokens            Token[] 
-  createdAt DateTime @default(now())
+  tokens            Token[]
+  updateRequests    UpdateRequest[] // Nueva relación
+  createdAt         DateTime     @default(now())
 }
 
 enum CATEGORY {
@@ -51,10 +49,10 @@ enum CATEGORY {
 }
 
 model Reciclyng {
-  id        Int   @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   weight    Float
   entityId  Int
-  entity    Entity     @relation(fields: [entityId], references: [id])
+  entity    Entity   @relation(fields: [entityId], references: [id])
   createdAt DateTime @default(now())
 }
 
@@ -69,4 +67,13 @@ model Token {
   isUsed       Boolean  @default(false)
   expiresAt    DateTime
   createdAt    DateTime @default(now())
+}
+
+model UpdateRequest {
+  id              Int      @id @default(autoincrement())
+  entityId        Int
+  entity          Entity   @relation(fields: [entityId], references: [id])
+  requestedWeight Float
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
 }

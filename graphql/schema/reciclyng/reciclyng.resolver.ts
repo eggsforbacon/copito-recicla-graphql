@@ -1,6 +1,6 @@
 import prisma from "@/prisma";
 import { UserInputError } from "apollo-server-micro";
-import { sendTokenEmail } from "@/utils/sendEmail";
+import { sendTokenEmail, sendAdminNotificationEmail, sendApprovalEmail } from "@/utils/sendEmail";
 import { randomBytes } from "crypto";
 
 type InputReciclyng = {
@@ -23,6 +23,17 @@ type TokenInput = {
 
 type TokenResponse = {
   message: string;
+};
+
+type UpdateRequestInput = {
+  input: {
+    entityId: number;
+    requestedWeight: number;
+  };
+};
+
+type ApproveRequestInput = {
+  requestId: number;
 };
 
 export const reciclyngResolver = {
@@ -107,6 +118,90 @@ export const reciclyngResolver = {
           entityId,
         },
       });
+    },
+
+    createUpdateRequest: async (_: unknown, args: UpdateRequestInput): Promise<any> => {
+      const { entityId, requestedWeight } = args.input;
+
+      const entity = await prisma.entity.findUnique({
+        where: { id: entityId },
+      });
+      if (!entity) {
+        throw new UserInputError(`No se encontró una entidad con ID ${entityId}`, {
+          code: 404,
+          status: 404,
+        });
+      }
+
+      const currentWeight = await prisma.reciclyng.aggregate({
+        _sum: { weight: true },
+        where: { entityId },
+      });
+      const currentTotal = currentWeight._sum.weight || 0;
+
+      const updateRequest = await prisma.updateRequest.create({
+        data: {
+          entityId,
+          requestedWeight,
+          status: "pending",
+        },
+      });
+
+      await sendAdminNotificationEmail({
+        entityName: entity.name,
+        requestedWeight,
+        currentWeight: currentTotal,
+        requestId: updateRequest.id,
+      });
+
+      return updateRequest;
+    },
+
+    approveUpdateRequest: async (_: unknown, args: ApproveRequestInput): Promise<any> => {
+      const { requestId } = args;
+
+      const updateRequest = await prisma.updateRequest.findUnique({
+        where: { id: requestId },
+      });
+
+      if (!updateRequest) {
+        throw new UserInputError(`No se encontró la solicitud con ID ${requestId}`, {
+          code: 404,
+          status: 404,
+        });
+      }
+
+      if (updateRequest.status !== "pending") {
+        throw new UserInputError("La solicitud ya ha sido procesada", {
+          code: 400,
+          status: 400,
+        });
+      }
+
+      const newRecycling = await prisma.reciclyng.create({
+        data: {
+          weight: updateRequest.requestedWeight,
+          entityId: updateRequest.entityId,
+        },
+      });
+
+      await prisma.updateRequest.update({
+        where: { id: requestId },
+        data: { status: "approved" },
+      });
+
+      const entity = await prisma.entity.findUnique({
+        where: { id: updateRequest.entityId },
+      });
+      if (entity) {
+        await sendApprovalEmail({
+          entityEmail: entity.email,
+          entityName: entity.name,
+          approvedWeight: updateRequest.requestedWeight,
+        });
+      }
+
+      return newRecycling;
     },
   },
 };

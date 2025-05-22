@@ -164,3 +164,51 @@ export const sendDeleteTokenEmail = async (token: string, entityId: number) => {
     throw new Error("No se pudo enviar el correo de verificación para la eliminación");
   }
 };
+
+export const sendAdminNotificationEmail = async (data: {
+  entityName: string;
+  requestedWeight: number;
+  currentWeight: number;
+  requestId: number;
+}) => {
+  const { entityName, requestedWeight, currentWeight, requestId } = data;
+  const newTotal = currentWeight + requestedWeight;
+
+  const mailOptions = {
+    from: process.env.NODEMAILER_HOST_EMAIL,
+    to: process.env.NODEMAILER_HOST_EMAIL,
+    subject: `Solicitud de actualización de peso - ${entityName}`,
+    html: `
+      <p>La entidad <strong>${entityName}</strong> ha solicitado actualizar su pesaje de reciclaje.</p>
+      <p><strong>Peso solicitado:</strong> ${requestedWeight} KG</p>
+      <p><strong>Peso actual:</strong> ${currentWeight} KG</p>
+      <p><strong>Nuevo total si se aprueba:</strong> ${newTotal} KG</p>
+      <p>Para aprobar esta solicitud, haz clic en el siguiente enlace:</p>
+      <a href="https://copitorecicla.com/api/approve-request?requestId=${requestId}">Aprobar solicitud</a>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+export const sendApprovalEmail = async (data: {
+  entityEmail: string;
+  entityName: string;
+  approvedWeight: number;
+}) => {
+  const { entityEmail, entityName, approvedWeight } = data;
+
+  const mailOptions = {
+    from: process.env.NODEMAILER_HOST_EMAIL,
+    to: entityEmail,
+    subject: "Solicitud de actualización de peso aprobada",
+    html: `
+      <p>Hola <strong>${entityName}</strong>,</p>
+      <p>Su solicitud para actualizar el pesaje de reciclaje ha sido aprobada.</p>
+      <p><strong>Peso aprobado:</strong> ${approvedWeight} KG</p>
+      <p>Gracias por su contribución al reciclaje.</p>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
