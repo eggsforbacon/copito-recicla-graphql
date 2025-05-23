@@ -251,7 +251,7 @@ export const sendAdminUpdateNotificationEmail = async (data: {
                   <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
                     Para aprobar esta solicitud, haz clic en el siguiente enlace:
                   </p>
-                  <a href="http://localhost:3001/approve/entity-update?requestId=${requestId}" 
+                  <a href="https://copitorecicla.com/approve/entity-update?requestId=${requestId}" 
                      style="display:inline-block; padding:10px 20px; background:#007bff; color:#ffffff; text-decoration:none; border-radius:4px;">
                     Aprobar solicitud
                   </a>
@@ -402,7 +402,7 @@ export const sendAdminNotificationEmail = async (data: {
                   <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
                     Para aprobar esta solicitud, haz clic en el siguiente enlace:
                   </p>
-                  <a href="http://localhost:3001/approve/request?requestId=${requestId}" 
+                  <a href="https://copitorecicla.com/approve/request?requestId=${requestId}" 
                      style="display:inline-block; padding:10px 20px; background:#007bff; color:#ffffff; text-decoration:none; border-radius:4px;">
                     Aprobar solicitud
                   </a>
