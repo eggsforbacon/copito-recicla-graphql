@@ -352,7 +352,7 @@ export const entityResolvers = {
         },
       });
 
-      await sendDeleteTokenEmail(token, entityId);
+      await sendDeleteTokenEmail(token, entity.name);
 
       return { message: `Token enviado al correo del administrador` };
     },
@@ -569,7 +569,8 @@ export const entityResolvers = {
         await sendEntityUpdateApprovalEmail({
           entityEmail: updatedEntity.email,
           entityName: updatedEntity.name,
-          updatedFields: changedFields,
+          currentData: currentEntity,
+          updateData: updateDataString,
         });
       }
 

@@ -65,7 +65,7 @@ export const sendTokenEmail = async (to: string, token: string) => {
                 <h2 style="margin:0 0 20px; color:#333333;">Hola, ${to}</h2>
                 
                 <p style="margin:0 0 30px; color:#555555; line-height:1.5;">
-                  Ingresa este token para confirmar los cambios que deseas realizar:
+                  Ingresa este token para descargar toda la información:
                 </p>
 
                 <div style="
@@ -87,7 +87,7 @@ export const sendTokenEmail = async (to: string, token: string) => {
                 </p>
 
                 <p style="margin:0 0 40px; color:#777777; font-size:14px;">
-                  Si no querías realizar ningún cambio, puedes ignorar este correo.
+                  Si no solicitaste descargar información, puedes ignorar este correo.
                 </p>
 
                 <p style="margin:0; color:#333333;">
@@ -112,7 +112,7 @@ export const sendTokenEmail = async (to: string, token: string) => {
   const mailOptions = {
     from: NODEMAILER_HOST_EMAIL,
     to,
-    subject: "Token de confirmación – Copito Recicla",
+    subject: "Token para descargar información – Copito Recicla",
     html,
   };
 
@@ -124,7 +124,7 @@ export const sendTokenEmail = async (to: string, token: string) => {
   }
 };
 
-export const sendDeleteTokenEmail = async (token: string, entityId: number) => {
+export const sendDeleteTokenEmail = async (token: string, entityName: string) => {
   const to = process.env.NODEMAILER_HOST_EMAIL;
 
   const html = `
@@ -144,7 +144,7 @@ export const sendDeleteTokenEmail = async (token: string, entityId: number) => {
                 <h2 style="margin:0 0 20px; color:#333333;">Hola,</h2>
                 
                 <p style="margin:0 0 30px; color:#555555; line-height:1.5;">
-                  Ingresa este token para confirmar la eliminación del registro seleccionado:
+                  Ingresa este token para confirmar la eliminación de la entidad "${entityName}":
                 </p>
 
                 <div style="
@@ -191,7 +191,7 @@ export const sendDeleteTokenEmail = async (token: string, entityId: number) => {
   const mailOptions = {
     from: process.env.NODEMAILER_HOST_EMAIL,
     to,
-    subject: "Token de confirmación - Copito Recicla (Eliminación)",
+    subject: "Token para eliminación de registro - Copito Recicla",
     html,
   };
 
@@ -210,7 +210,7 @@ export const sendAdminUpdateNotificationEmail = async (data: {
 }) => {
   const { entityName, currentData, updateData, requestId } = data;
   const updateFields = JSON.parse(updateData);
-  
+
   const changedFields = getChangedFields(currentData, updateFields);
 
   if (changedFields.length === 0) {
@@ -251,7 +251,7 @@ export const sendAdminUpdateNotificationEmail = async (data: {
                   <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
                     Para aprobar esta solicitud, haz clic en el siguiente enlace:
                   </p>
-                  <a href="https://copitorecicla.com/api/approve-entity-update?requestId=${requestId}" 
+                  <a href="http://localhost:3001/approve/entity-update?requestId=${requestId}" 
                      style="display:inline-block; padding:10px 20px; background:#007bff; color:#ffffff; text-decoration:none; border-radius:4px;">
                     Aprobar solicitud
                   </a>
@@ -290,12 +290,18 @@ export const sendAdminUpdateNotificationEmail = async (data: {
 export const sendEntityUpdateApprovalEmail = async (data: {
   entityEmail: string;
   entityName: string;
-  updatedFields: string[];
+  currentData: any;
+  updateData: string;
 }) => {
-  const { entityEmail, entityName, updatedFields } = data;
+  const { entityEmail, entityName, currentData, updateData } = data;
+  const updateFields = JSON.parse(updateData);
+  const changedFields = getChangedFields(currentData, updateFields);
 
-  const updatedFieldsHtml = updatedFields
-    .map(field => `<li>${fieldNameMapping[field] || field}</li>`)
+  const changesHtml = changedFields
+    .map(({ field, oldValue, newValue }) => {
+      const label = fieldNameMapping[field] || field;
+      return `<li><strong>${label}</strong>: De "${oldValue}" a "${newValue}"</li>`;
+    })
     .join('');
 
   const html = `
@@ -323,7 +329,7 @@ export const sendEntityUpdateApprovalEmail = async (data: {
                     <strong>Campos actualizados:</strong>
                   </p>
                   <ul style="margin:0 0 30px; padding-left:20px; color:#555555; line-height:1.5;">
-                    ${updatedFieldsHtml}
+                    ${changesHtml}
                   </ul>
                   <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
                     Gracias por mantener su información actualizada.
@@ -396,7 +402,7 @@ export const sendAdminNotificationEmail = async (data: {
                   <p style="margin:0 0 20px; color:#555555; line-height:1.5;">
                     Para aprobar esta solicitud, haz clic en el siguiente enlace:
                   </p>
-                  <a href="https://copitorecicla.com/api/approve-request?requestId=${requestId}" 
+                  <a href="http://localhost:3001/approve/request?requestId=${requestId}" 
                      style="display:inline-block; padding:10px 20px; background:#007bff; color:#ffffff; text-decoration:none; border-radius:4px;">
                     Aprobar solicitud
                   </a>
