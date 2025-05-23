@@ -180,7 +180,7 @@ export const reciclyngResolver = {
 
       const newRecycling = await prisma.reciclyng.create({
         data: {
-          weight: updateRequest.requestedWeight,
+          weight: updateRequest.requestedWeight ?? 0,
           entityId: updateRequest.entityId,
         },
       });
@@ -197,7 +197,7 @@ export const reciclyngResolver = {
         await sendApprovalEmail({
           entityEmail: entity.email,
           entityName: entity.name,
-          approvedWeight: updateRequest.requestedWeight,
+          approvedWeight: updateRequest.requestedWeight ?? 0,
         });
       }
 
