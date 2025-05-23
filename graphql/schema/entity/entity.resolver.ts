@@ -617,7 +617,7 @@ export const entityResolvers = {
 
       const newRecycling = await prisma.reciclyng.create({
         data: {
-          weight: updateRequest.requestedWeight,
+          weight: updateRequest.requestedWeight ?? 0,
           entityId: updateRequest.entityId,
         },
       });
