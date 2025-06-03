@@ -7,6 +7,10 @@ export const ReciclyngTypeDefs = gql`
     createdAt: String
   }
 
+  type Query {
+  totalReciclyng: Float!
+  }
+
   input ReciclyngInput {
     weight: Float!
     entityId: Int!

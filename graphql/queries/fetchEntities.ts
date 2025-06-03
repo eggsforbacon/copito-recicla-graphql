@@ -63,6 +63,12 @@ export const FETCH_ENTITIES_BY_RECICLING = gql`
   }
 `;
 
+export const FETCH_TOTAL_RECICLYNG = gql`
+  query FetchTotalReciclyng {
+    totalReciclyng
+  }
+`;
+
 /**
  * export const FETCH_ENTITIES = gql`
   query FetchEntities {

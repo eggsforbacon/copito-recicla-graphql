@@ -1,9 +1,43 @@
 import Link from "next/link";
 import Image from "next/image";
-
+import { useState, useEffect } from "react";
+import { FETCH_TOTAL_RECICLYNG } from "@/graphql/queries/fetchEntities";
+import { useQuery } from "@apollo/client";
 import Layout from "../components/layout";
 
 function MobileHome() {
+  const [recycledKg, setRecycledKg] = useState(0); // Estado para el valor total
+  const [displayedKg, setDisplayedKg] = useState(0); // Estado para la animación
+  const { data, loading, error } = useQuery(FETCH_TOTAL_RECICLYNG);
+
+  useEffect(() => {
+    if (data && data.totalReciclyng) {
+      const total = data.totalReciclyng;
+      setRecycledKg(total);
+
+      // Animación de 0 al total
+      let start = 0;
+      const increment = total / 100; // Incremento por paso
+      const duration = 2000; // Duración de la animación en ms
+      const stepTime = duration / 100; // Tiempo por paso
+
+      const animate = () => {
+        start += increment;
+        if (start >= total) {
+          setDisplayedKg(total);
+          return;
+        }
+        setDisplayedKg(Math.floor(start));
+        setTimeout(animate, stepTime);
+      };
+
+      animate();
+    }
+  }, [data]);
+
+  if (loading) return <p className="text-white text-center">Cargando...</p>;
+  if (error) return <p className="text-red-500 text-center">Error al cargar el total de reciclaje</p>;
+
   return (
     <div className="relative w-full min-h-screen">
       {/* Fondo fijo */}
@@ -53,11 +87,11 @@ function MobileHome() {
             climático.
           </p>
         </div>
-        {/* Enlace, Buscador y Logo Inferior (mantener arriba) */}
-        <div className="flex flex-col items-center ">
+
+        {/* Enlace, Buscador y Contador */}
+        <div className="flex flex-col items-center">
           {/* Buscador */}
-          <div className="flex flex-col items-center  gap-4">
-            {/* Buscador alineado con el texto */}
+          <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-4">
               <Link href="/buscador">
                 <button className="bg-[#2E3A59] text-white font-bold px-6 py-4 rounded-full hover:bg-[#3E4A69] transition-colors">
@@ -65,7 +99,7 @@ function MobileHome() {
                 </button>
               </Link>
             </div>
-            <div className="text-white italic text-sm mb-6 ">
+            <div className="text-white italic text-sm mb-6">
               Conoce los términos y condiciones{" "}
               <Link
                 href="/documents/BASES_DEL_CONCURSO_COPITO%20RECICLA_12.pdf"
@@ -75,17 +109,71 @@ function MobileHome() {
               </Link>
             </div>
           </div>
+
+          {/* Contador al final para móviles */}
+          <div className="mt-4 text-black text-lg font-bold flex flex-col items-center">
+            <span>Total reciclado:</span>
+            <div className="flex items-baseline">
+              <div className="flex gap-1">
+                {displayedKg
+                  .toString()
+                  .split('')
+                  .map((digit, index) => (
+                    <span
+                      key={index}
+                      className="bg-[#3C6884] text-white text-3xl font-bold px-3 py-2 rounded-xl"
+                    >
+                      {digit}
+                    </span>
+                  ))}
+              </div>
+              <span className="bg-[#3C6884] text-white text-3xl font-bold px-3 py-2 rounded-xl ml-2">kg</span>
+            </div>
+          </div>
         </div>
       </main>
     </div>
   );
 }
+
 export default function Home() {
+  const [recycledKg, setRecycledKg] = useState(0); // Estado para el valor total
+  const [displayedKg, setDisplayedKg] = useState(0); // Estado para la animación
+  const { data, loading, error } = useQuery(FETCH_TOTAL_RECICLYNG);
+
+  useEffect(() => {
+    if (data && data.totalReciclyng) {
+      const total = data.totalReciclyng;
+      setRecycledKg(total);
+
+      // Animación de 0 al total
+      let start = 0;
+      const increment = total / 100; // Incremento por paso
+      const duration = 2000; // Duración de la animación en ms
+      const stepTime = duration / 100; // Tiempo por paso
+
+      const animate = () => {
+        start += increment;
+        if (start >= total) {
+          setDisplayedKg(total);
+          return;
+        }
+        setDisplayedKg(Math.floor(start));
+        setTimeout(animate, stepTime);
+      };
+
+      animate();
+    }
+  }, [data]);
+
+  if (loading) return <p className="text-white text-center">Cargando...</p>;
+  if (error) return <p className="text-red-500 text-center">Error al cargar el total de reciclaje</p>;
+
   return (
     <Layout>
       <>
         <main
-          className=" w-full min-h-screen text-[#3C3C3B] flex flex-col items-center justify-between py-16 px-6 md:px-40 relative lg:block hidden"
+          className="w-full min-h-screen text-[#3C3C3B] flex flex-col items-center justify-between py-16 px-6 md:px-40 relative lg:block hidden"
           style={{
             backgroundImage:
               "url('/images/bg-inicio.png'), url('/images/bg.png')",
@@ -126,7 +214,7 @@ export default function Home() {
               climático.
             </p>
 
-            <div className="text-white italic ">
+            <div className="text-white italic">
               Conoce los términos y condiciones{" "}
               <Link
                 href="/documents/BASES_DEL_CONCURSO_COPITO%20RECICLA_12.pdf"
@@ -135,33 +223,30 @@ export default function Home() {
                 aquí
               </Link>
             </div>
-            
-              {/* Buscador alineado con el texto */}
-              <div className="flex items-center gap-4">
-                <Link href="/buscador">
-                  <button className="bg-[#2E3A59] text-xl text-white font-bold px-10 py-4 rounded-full hover:bg-[#3E4A69] transition-colors">
-                    ¡Consulta cuanto llevas!
-                  </button>
-                </Link>
-              </div>
-            
+
+            {/* Buscador alineado con el texto */}
+            <div className="flex items-center gap-4">
+              <Link href="/buscador">
+                <button className="bg-[#2E3A59] text-xl text-white font-bold px-10 py-6 rounded-full hover:bg-[#3E4A69] transition-colors">
+                  ¡Consulta cuanto llevas!
+                </button>
+              </Link>
+            </div>
           </div>
 
           {/* Imagen del personaje */}
-          <div className="absolute right-0  lg:top-40 md:top-40 xl:top-40">
+          <div className="absolute right-0 lg:top-40 md:top-40 xl:top-40">
             <Image
               src="/images/PPT-18-2.png"
               alt="Personaje Copito"
               width={500}
               height={500}
-              className=" w-64 h-72 md:w-[350px]  md:h-[450px] lg:w-[350px] lg:h-[350px]   xl:w-[400px] xl:h-[450px]"
+              className="w-64 h-72 md:w-[350px] md:h-[450px] lg:w-[350px] lg:h-[350px] xl:w-[400px] xl:h-[450px]"
             />
           </div>
 
-          {/* Sección inferior: Botón de búsqueda, input y logo */}
-
-          {/* Logo en la esquina inferior derecha */}
-          <div className="absolute right-8 bottom-4">
+          {/* Logo en la esquina inferior izquierda */}
+          <div className="absolute left-8 bottom-10">
             <Image
               src="/images/logo-cc.png"
               alt="logo cc"
@@ -170,7 +255,29 @@ export default function Home() {
               className="object-contain"
             />
           </div>
+
+          {/* Contador en la esquina inferior derecha para escritorio */}
+          <div className="absolute right-28 bottom-16 text-black text-3xl font-bold flex flex-col items-center ">
+            <span>Total reciclado:</span>
+            <div className="flex items-baseline">
+              <div className="flex gap-1">
+                {displayedKg
+                  .toString()
+                  .split('')
+                  .map((digit, index) => (
+                    <span
+                      key={index}
+                      className="bg-[#3C6884] text-white text-3xl font-bold px-3 py-2 rounded-xl"
+                    >
+                      {digit}
+                    </span>
+                  ))}
+              </div>
+              <span className="bg-[#3C6884] text-white text-3xl font-bold px-3 py-2 rounded-xl ml-2">kg</span>
+            </div>
+          </div>
         </main>
+
         {/* Diseño para teléfonos (1000px o menos) */}
         <div className="lg:hidden block">
           <MobileHome />

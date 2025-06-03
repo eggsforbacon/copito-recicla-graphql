@@ -37,6 +37,16 @@ type ApproveRequestInput = {
 };
 
 export const reciclyngResolver = {
+  Query: {
+    totalReciclyng: async () => {
+      const total = await prisma.reciclyng.aggregate({
+        _sum: {
+          weight: true,
+        },
+      });
+      return total._sum.weight || 0;
+    },
+  },
   Mutation: {
     generateReciclyngToken: async (_: unknown, args: InputReciclyng): Promise<TokenResponse> => {
       const { weight, entityId } = args.input;
