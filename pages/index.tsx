@@ -13,25 +13,26 @@ function MobileHome() {
   useEffect(() => {
     if (data && data.totalReciclyng) {
       const total = data.totalReciclyng;
-      setRecycledKg(total);
+      const roundedTotal = Math.round(total); // Redondear al entero más cercano
+      setRecycledKg(roundedTotal);
 
-      // Animación de 0 al total
-      let start = 0;
-      const increment = total / 100; // Incremento por paso
-      const duration = 2000; // Duración de la animación en ms
-      const stepTime = duration / 100; // Tiempo por paso
+      const duration = 2000; // Duración de la animación en milisegundos
+      const startTime = Date.now();
 
       const animate = () => {
-        start += increment;
-        if (start >= total) {
-          setDisplayedKg(total);
-          return;
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(1, elapsed / duration); // Progreso de 0 a 1
+        const currentValue = Math.round(progress * roundedTotal); // Valor entero actual
+        setDisplayedKg(currentValue);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate); // Continuar animación
+        } else {
+          setDisplayedKg(roundedTotal); // Asegurar valor final exacto
         }
-        setDisplayedKg(Math.floor(start));
-        setTimeout(animate, stepTime);
       };
 
-      animate();
+      requestAnimationFrame(animate); // Iniciar animación
     }
   }, [data]);
 
@@ -144,25 +145,26 @@ export default function Home() {
   useEffect(() => {
     if (data && data.totalReciclyng) {
       const total = data.totalReciclyng;
-      setRecycledKg(total);
+      const roundedTotal = Math.round(total); // Redondear al entero más cercano
+      setRecycledKg(roundedTotal);
 
-      // Animación de 0 al total
-      let start = 0;
-      const increment = total / 100; // Incremento por paso
-      const duration = 2000; // Duración de la animación en ms
-      const stepTime = duration / 100; // Tiempo por paso
+      const duration = 2000; // Duración de la animación en milisegundos
+      const startTime = Date.now();
 
       const animate = () => {
-        start += increment;
-        if (start >= total) {
-          setDisplayedKg(total);
-          return;
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(1, elapsed / duration); // Progreso de 0 a 1
+        const currentValue = Math.round(progress * roundedTotal); // Valor entero actual
+        setDisplayedKg(currentValue);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate); // Continuar animación
+        } else {
+          setDisplayedKg(roundedTotal); // Asegurar valor final exacto
         }
-        setDisplayedKg(Math.floor(start));
-        setTimeout(animate, stepTime);
       };
 
-      animate();
+      requestAnimationFrame(animate); // Iniciar animación
     }
   }, [data]);
 
